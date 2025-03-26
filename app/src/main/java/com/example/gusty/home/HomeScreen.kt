@@ -2,6 +2,7 @@ package com.example.gusty.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,84 +23,60 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gusty.R
-import com.example.gusty.ui.theme.blue
-import com.example.gusty.ui.theme.dark_blue
-
-data class HourlyWeather(
-    val temperature: Int,
-    val weatherIcon: Int,
-    val time: String
-)
-
-// Dummy list of hourly weather data
-val dummyHourlyWeatherData = listOf(
-    HourlyWeather(14, R.drawable.sun_image, "06:00 AM"),
-    HourlyWeather(16, R.drawable.sun_image, "07:00 AM"),
-    HourlyWeather(18, R.drawable.sun_image, "08:00 AM"),
-    HourlyWeather(20, R.drawable.sun_image, "09:00 AM"),
-    HourlyWeather(22, R.drawable.sun_image, "10:00 AM"),
-    HourlyWeather(24, R.drawable.sun_image, "11:00 AM")
-)
-
-data class MeteorologicalParam(
-    val temperature: Float,
-    val metoIcon: Int, // Drawable resource ID
-    val metoName: String
-)
-
-// Dummy list of hourly weather data
-val dummyMeteorologicalParam = listOf(
-    MeteorologicalParam(4.09f, R.drawable.wind_icon, "Wind"),
-    MeteorologicalParam(2.73f, R.drawable.rain_icon, "Rain"),
-    MeteorologicalParam(83f, R.drawable.cloudy_icon, "Cloud"),
-    MeteorologicalParam(20f, R.drawable.pressure_icon, "Pressure"),
-)
+import com.example.gusty.home.model.CurrentWeatherModel
+import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
+import com.example.gusty.ui.theme.nightColor
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(homeViewModel: HomeViewModel) {
     val isVisible = remember { mutableStateOf(false) }
+    val currentWeatherViewModel = homeViewModel.currentWeather.observeAsState()
+    val hourlyWeatherViewModel = homeViewModel.hourlyWeather.observeAsState()
+    val dailyWeatherViewModel = homeViewModel.dailyWeather.observeAsState()
+    homeViewModel.getCurrentWeather()
+    homeViewModel.getHourlyWeather()
+    homeViewModel.getDailyWeather()
     LaunchedEffect(Unit) {
         isVisible.value = true
     }
     Column(
         modifier = Modifier
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        blue, dark_blue
-                    )
-                )
-            )
+            .background(currentWeatherViewModel.value?.backgroundColor ?: Color.White )
             .fillMaxSize()
     ) {
         Spacer(Modifier.height(10.dp))
-        DailyWeatherInfoCard()
+        DailyWeatherInfoCard(currentWeatherViewModel)
         Spacer(Modifier.height(10.dp))
-        DailyAndHourlyWeatherCard()
+        DailyAndHourlyWeatherCard(hourlyWeatherViewModel , dailyWeatherViewModel)
         Spacer(Modifier.height(10.dp))
-
-        LazyRow(modifier = Modifier.fillMaxWidth()) {
-            itemsIndexed(dummyMeteorologicalParam) { _, meto ->
-                MeteorologicalParameters(meto)
-            }
+        Row {
+            WindCard(currentWeatherViewModel)
+            RainCard(currentWeatherViewModel)
         }
-
+        Spacer(Modifier.height(5.dp))
+        Row {
+            CloudCard(currentWeatherViewModel)
+            PressureCard(currentWeatherViewModel)
+        }
     }
 }
 @Composable
-fun DailyWeatherInfoCard() {
+fun DailyWeatherInfoCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,14 +84,19 @@ fun DailyWeatherInfoCard() {
 
         Column(modifier = Modifier.padding(top = 10.dp, start = 5.dp)) {
             Row {
+                currentWeatherViewModel.value?.let {
+                    Text(
+                        it.countryName, fontSize = 20.sp, modifier = Modifier
+                            .padding(top = 15.dp), color = Color.White, fontWeight = FontWeight.Bold
+                    )
+                }
                 Text(
-                    "Egypt", fontSize = 15.sp, modifier = Modifier
-                        .padding(top = 15.dp), color = Color.White
-                )
-
-                Text(
-                    " , Cairo", fontSize = 15.sp, modifier = Modifier
-                        .padding(top = 15.dp), color = Color.White
+                    " , ${currentWeatherViewModel.value?.cityName}",
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .padding(top = 15.dp),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
                 )
                 Image(
                     painter = painterResource(R.drawable.location),
@@ -126,7 +109,7 @@ fun DailyWeatherInfoCard() {
             }
             Row {
                 Text(
-                    "14",
+                    "${currentWeatherViewModel.value?.main?.temperature}",
                     fontSize = 70.sp,
                     modifier = Modifier
                         .padding(top = 10.dp, start = 5.dp),
@@ -137,19 +120,21 @@ fun DailyWeatherInfoCard() {
                     text = "C", modifier = Modifier.padding(5.dp), color = Color.White
                 )
             }
-            Text(
-                text = "Mostly Cloudy",
-                modifier =
-                Modifier.padding(top = 10.dp, start = 5.dp),
-                fontSize = 15.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
+            currentWeatherViewModel.value?.weather?.get(0)?.description?.let {
+                Text(
+                    text = it,
+                    modifier =
+                    Modifier.padding(top = 10.dp, start = 5.dp),
+                    fontSize = 15.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
             Spacer(Modifier.height(5.dp))
             Column {
                 Row {
                     Text(
-                        " 18",
+                        "${currentWeatherViewModel.value?.main?.minimumTemperature}",
                         fontSize = 20.sp,
                         modifier = Modifier
                             .padding(top = 15.dp, start = 10.dp),
@@ -160,11 +145,11 @@ fun DailyWeatherInfoCard() {
                         text = "C", modifier = Modifier.padding(5.dp), color = Color.White
                     )
                     Text(
-                        "/", fontSize = 15.sp, modifier = Modifier
+                        " / ", fontSize = 15.sp, modifier = Modifier
                             .padding(top = 15.dp), color = Color.White
                     )
                     Text(
-                        " 12",
+                        "${currentWeatherViewModel.value?.main?.maximumTemperature}",
                         fontSize = 20.sp,
                         modifier = Modifier
                             .padding(top = 15.dp),
@@ -183,10 +168,10 @@ fun DailyWeatherInfoCard() {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        " 12",
+                        "${currentWeatherViewModel.value?.main?.feelsLike}",
                         fontSize = 20.sp,
                         modifier = Modifier
-                            .padding(top = 15.dp),
+                            .padding(top = 15.dp, start = 5.dp),
                         color = Color.White,
                         fontWeight = FontWeight.Bold
 
@@ -203,7 +188,10 @@ fun DailyWeatherInfoCard() {
     }
 }
 @Composable
-fun DailyAndHourlyWeatherCard() {
+fun DailyAndHourlyWeatherCard(
+    hourlyWeatheViewModel: State<List<HourlyAndDailyModel>?>,
+    dailyWeatherViewModel: State<List<HourlyAndDailyModel>?>
+) {
     val selectOption = remember { mutableStateOf("Hourly") }
     Card(
         modifier = Modifier
@@ -222,7 +210,9 @@ fun DailyAndHourlyWeatherCard() {
                 .fillMaxWidth()
                 .padding(5.dp)
         ) {
-            Row(modifier = Modifier.fillMaxWidth().padding(5.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp)) {
                 Button(
                     onClick = { selectOption.value = "Hourly" },
                     modifier = Modifier
@@ -245,7 +235,7 @@ fun DailyAndHourlyWeatherCard() {
                         .weight(1f)
                         .padding(5.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectOption.value == "Daily") Color.Black else Color.Gray,
+                        containerColor = if (selectOption.value == "Daily") Color.Black else nightColor,
                         contentColor = Color.White // Text color
                     )
                 ) {
@@ -256,80 +246,292 @@ fun DailyAndHourlyWeatherCard() {
                     )
                 }
             }
-            IsHourlyOrDaily(selectOption)
+            IsHourlyOrDaily(selectOption , hourlyWeatheViewModel , dailyWeatherViewModel )
         }
     }
 }
 @Composable
-fun MeteorologicalParameters(meteorologicalParam: MeteorologicalParam) {
+fun WindCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
     Card(
         modifier = Modifier
-            .size(width = 140.dp, height = 150.dp)
-            .padding(start = 20.dp, end = 20.dp, top = 15.dp)
-            .shadow(
-                elevation = 25.dp,
-                ambientColor = Color.Black,
-                spotColor = Color.Cyan,
-                shape = RoundedCornerShape(20.dp)
-            ),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+            .width(200.dp)
+            .padding(8.dp)
+            .height(120.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF4E4F4F).copy(alpha = 0.2f)) // Light Blue Transparent
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    color = Color.Gray.copy(0.0f)
-                )
+                .padding(5.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.wind_icon), // Replace with your drawable
+                    contentDescription = "Wind Icon",
+                    modifier = Modifier.size(32.dp),
+                    colorFilter = ColorFilter.tint(Color.White) // Optional tint
+                )
+                Text(
+                    text = "Wind",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(start = 10.dp, top = 3.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier
+                .align(Alignment.Start)
+                .padding(start = 5.dp)) {
+                Text(
+                    text = "Speed : ",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = " ${currentWeatherViewModel.value?.wind?.speed} km/h",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-            Image(
-                painter = painterResource(meteorologicalParam.metoIcon),
-                contentDescription = "icon",
-                modifier = Modifier
-                    .size(width = 100.dp, height = 50.dp)
-                    .padding(top = 5.dp)
-            )
-            Text(
-                text = "${meteorologicalParam.temperature} + m/s",
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = meteorologicalParam.metoName,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-@Composable
-fun IsHourlyOrDaily(selectOption: MutableState<String>) {
-    if(selectOption.value == "Hourly"){
-        LazyRow {
-            itemsIndexed(dummyHourlyWeatherData){_,hourly->
-                HourlyWeatherItem(hourly)
+            Row(modifier = Modifier
+                .align(Alignment.Start)
+                .padding(start = 5.dp)) {
+                Text(
+                    text = "deg : ",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${currentWeatherViewModel.value?.wind?.deg}",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(text = "o", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
             }
-        }
-    }else {
-        LazyRow {
-            itemsIndexed(dummyHourlyWeatherData){_,hourly->
-                HourlyWeatherItem(hourly)
+
+            Row(modifier = Modifier
+                .align(Alignment.Start)
+                .padding(start = 5.dp)) {
+                Text(
+                    text = "gust  : ",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = " ${currentWeatherViewModel.value?.wind?.gust} m/s",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
 }
 @Composable
-fun HourlyWeatherItem(hourlyWeather: HourlyWeather) {
+fun RainCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
+    Card(
+        modifier = Modifier
+            .width(150.dp)
+            .padding(8.dp)
+            .height(80.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF4E4F4F).copy(alpha = 0.2f)) // Light Blue Transparent
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(5.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.rain_icon), // Replace with your drawable
+                    contentDescription = "Wind Icon",
+                    modifier = Modifier.size(32.dp),
+                    colorFilter = ColorFilter.tint(Color.White) // Optional tint
+                )
+                Text(
+                    text = "Rain",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(start = 10.dp, top = 3.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier
+                .align(Alignment.Start)
+                .padding(start = 5.dp)) {
+                Text(
+                    text = "Last Hour : ",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = " ${currentWeatherViewModel.value?.rain} km/h",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+@Composable
+fun CloudCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
+    Card(
+        modifier = Modifier
+            .width(150.dp)
+            .padding(8.dp)
+            .height(80.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF4E4F4F).copy(alpha = 0.2f)) // Light Blue Transparent
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(5.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.cloudy_icon), // Replace with your drawable
+                    contentDescription = "Wind Icon",
+                    modifier = Modifier.size(32.dp),
+                    colorFilter = ColorFilter.tint(Color.White) // Optional tint
+                )
+                Text(
+                    text = "Clouds",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(start = 10.dp, top = 3.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier
+                .align(Alignment.Start)
+                .padding(start = 5.dp)) {
+                Text(
+                    text = "Clouds : ",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = " ${currentWeatherViewModel.value?.clouds?.all} %",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+@Composable
+fun PressureCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
+    Card(
+        modifier = Modifier
+            .width(190.dp)
+            .padding(8.dp)
+            .height(80.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF4E4F4F).copy(alpha = 0.2f)) // Light Blue Transparent
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(5.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.pressure_icon), // Replace with your drawable
+                    contentDescription = "Wind Icon",
+                    modifier = Modifier.size(32.dp),
+                    colorFilter = ColorFilter.tint(Color.White) // Optional tint
+                )
+                Text(
+                    text = "Pressure",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(start = 10.dp, top = 3.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier
+                .align(Alignment.Start)
+                .padding(start = 5.dp)) {
+                Text(
+                    text = "Pressure : ",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = " ${currentWeatherViewModel.value?.main?.pressure} hPa",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+@Composable
+fun IsHourlyOrDaily(
+    selectOption: MutableState<String>,
+    hourlyWeatherViewModel: State<List<HourlyAndDailyModel>?>,
+    dailyWeatherViewModel: State<List<HourlyAndDailyModel>?>
+) {
+
+
+    if (selectOption.value == "Hourly") {
+        LazyRow {
+            itemsIndexed(hourlyWeatherViewModel.value.orEmpty()){ _, hour ->
+                HourlyWeatherItem(hour)
+            }
+        }
+    } else {
+        LazyRow {
+            itemsIndexed(dailyWeatherViewModel.value.orEmpty()) { _, daily ->
+                DailyWeatherItem(daily)
+            }
+        }
+    }
+}
+@Composable
+fun HourlyWeatherItem(hour: HourlyAndDailyModel) {
     Column(
         modifier = Modifier
-            .padding(start = 3.dp , end = 3.dp)
+            .padding(start = 3.dp, end = 3.dp)
     ) {
         Card(
             modifier = Modifier
@@ -348,13 +550,16 @@ fun HourlyWeatherItem(hourlyWeather: HourlyWeather) {
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                blue, dark_blue
-                            )
-                        )
+                       hour.backGroundColor
                     )
             ) {
+                Image(
+                    painter = painterResource(hour.icon)
+                    , contentDescription = "weather_icon"
+                    , modifier = Modifier.fillMaxWidth()
+                        .height(50.dp)
+                        .padding(top = 5.dp)
+                )
                 Text(
                     text = "C",
                     color = Color.White,
@@ -365,29 +570,75 @@ fun HourlyWeatherItem(hourlyWeather: HourlyWeather) {
                         .padding(top = 8.dp, start = 50.dp)
                 )
                 Text(
-                    hourlyWeather.temperature.toString(),
+                   "${hour.temperature}",
                     color = Color.White,
                     fontSize = 40.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Image(
-                    painter = painterResource(hourlyWeather.weatherIcon),
-                    contentDescription = "weather image",
-                    Modifier
-                        .size(width = 80.dp, height = 80.dp)
-                        .padding(start = 20.dp)
-                )
+
                 Text(
-                    text = hourlyWeather.time,
+                    text = hour.time,
                     color = Color.White,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(), fontWeight = FontWeight.Bold
                 )
-
             }
         }
     }
 }
 
+@Composable
+fun DailyWeatherItem(daily: HourlyAndDailyModel) {
+    Column(
+        modifier = Modifier
+            .padding(start = 3.dp, end = 3.dp)
+    ) {
+        Card(
+            modifier = Modifier
+                .size(width = 140.dp, height = 200.dp)
+                .padding(start = 20.dp, end = 20.dp, top = 15.dp)
+                .shadow(
+                    elevation = 25.dp,
+                    ambientColor = Color.Black,
+                    spotColor = Color.Cyan,
+                    shape = RoundedCornerShape(20.dp)
+                ),
+            shape = RoundedCornerShape(20.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        daily.backGroundColor
+                    )
+            ) {
+                Image(
+                    painter = painterResource(daily.icon)
+                    , contentDescription = "weather_icon"
+                    , modifier = Modifier.fillMaxWidth()
+                        .height(50.dp)
+                        .padding(top = 5.dp)
+                )
+                Text(
+                    text = "C",
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, start = 50.dp)
+                )
+                Text(
+                    "${daily.temperature}",
+                    color = Color.White,
+                    fontSize = 40.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
 

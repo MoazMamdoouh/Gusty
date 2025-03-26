@@ -1,15 +1,23 @@
 package com.example.gusty.data.remote
 
-import retrofit2.Response
+import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
+import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface Api {
 
-
-    @GET("daily")
+    @GET("weather")
     suspend fun getDailyWeatherInfo(
-        // take the lan
-        // take the lon
-        // take the API_KEY
-    ) : Response<Any>
+        @Query("lat") lat: Double =30.0529,
+        @Query("lon") lon: Double = 31.3436,
+        @Query("appid") apiKey: String = "b753d8e898af2c2c8235d35152cf5139"
+    ) : CurrentWeatherDto
+
+    @GET("forecast")
+    suspend fun getHourlyAndDailyWeather(
+        @Query("lat") lat: Double =30.0529,
+        @Query("lon") lon: Double = 31.3436,
+        @Query("appid") apiKey: String = "b753d8e898af2c2c8235d35152cf5139"
+    ) : HourlyAndDailyDto
 }
