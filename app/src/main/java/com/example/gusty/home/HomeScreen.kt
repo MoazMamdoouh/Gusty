@@ -44,16 +44,12 @@ import com.example.gusty.ui.theme.nightColor
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel) {
-    val isVisible = remember { mutableStateOf(false) }
     val currentWeatherViewModel = homeViewModel.currentWeather.observeAsState()
     val hourlyWeatherViewModel = homeViewModel.hourlyWeather.observeAsState()
     val dailyWeatherViewModel = homeViewModel.dailyWeather.observeAsState()
     homeViewModel.getCurrentWeather()
     homeViewModel.getHourlyWeather()
     homeViewModel.getDailyWeather()
-    LaunchedEffect(Unit) {
-        isVisible.value = true
-    }
     Column(
         modifier = Modifier
             .background(currentWeatherViewModel.value?.backgroundColor ?: Color.White )

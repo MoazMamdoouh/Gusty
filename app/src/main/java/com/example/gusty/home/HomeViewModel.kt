@@ -13,6 +13,7 @@ import com.example.gusty.home.model.hourly_daily_model.convertUnixToHour
 import com.example.gusty.home.model.hourly_daily_model.hourlyModel
 import com.example.gusty.home.model.hourly_daily_model.mapDailyDtoToModel
 import com.example.gusty.home.model.mapDtoToModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -30,7 +31,7 @@ class HomeViewModel(val repo: GustyRepo) : ViewModel() {
     private val _dailyWeather = MutableLiveData<List<HourlyAndDailyModel>>()
     val dailyWeather = _dailyWeather
     fun getCurrentWeather() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val current = repo.getCurrentWeather()
                     .map { dto -> dto.mapDtoToModel() }

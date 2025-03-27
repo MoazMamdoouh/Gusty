@@ -13,7 +13,6 @@ class GustyRepoImpl private constructor(
 ) : GustyRepo{
     override suspend fun getCurrentWeather(): Flow<CurrentWeatherDto>{
         return try {
-            Log.i("TAG", "getCurrentWeather: repo Success")
              weatherRemoteDataSource.getCurrentWeather()
         }catch (e : Exception){
             Log.i("TAG", "getCurrentWeather: repo  error ${e.message} ")
@@ -23,7 +22,6 @@ class GustyRepoImpl private constructor(
 
     override suspend fun getDailyAndHourlyWeather(): Flow<HourlyAndDailyDto> {
         return try {
-            Log.i("TAG", "getDailyAndHourlyWeather repo : success with  ")
             weatherRemoteDataSource.getHourlyAndDailyWeather()
         }catch (e : Exception){
             Log.i("TAG", "getDailyAndHourlyWeather repo : error ")

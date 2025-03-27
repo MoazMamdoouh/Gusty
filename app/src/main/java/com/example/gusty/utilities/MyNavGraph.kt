@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.gusty.favorite.FavoriteScreen
 import com.example.gusty.home.HomeScreen
 import com.example.gusty.home.HomeViewModel
 
@@ -12,5 +13,6 @@ import com.example.gusty.home.HomeViewModel
 fun MyNavGraph(navController: NavHostController, homeViewModel: HomeViewModel) {
     NavHost(navController, startDestination = "home_screen") {
         composable("home_screen") { HomeScreen(homeViewModel) }
+        composable("favorite_screen") { FavoriteScreen()  }
     }
 }
