@@ -11,8 +11,8 @@ import com.example.gusty.home.HomeViewModel
 
 @Composable
 fun MyNavGraph(navController: NavHostController, homeViewModel: HomeViewModel) {
-    NavHost(navController, startDestination = "home_screen") {
-        composable("home_screen") { HomeScreen(homeViewModel) }
-        composable("favorite_screen") { FavoriteScreen()  }
+    NavHost(navController, startDestination = Routes.HOME) {
+        composable(Routes.HOME.toString()) { HomeScreen(homeViewModel) }
+        composable(Routes.FAVORITE.toString()) { FavoriteScreen()  }
     }
 }
