@@ -1,5 +1,6 @@
 package com.example.gusty.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
@@ -43,17 +45,27 @@ import com.example.gusty.ui.theme.nightColor
 import com.example.gusty.utilities.LocationPermission
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel) {
+fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double = 0.0) {
     val currentWeatherViewModel = homeViewModel.currentWeather.observeAsState()
     val hourlyWeatherViewModel = homeViewModel.hourlyWeather.observeAsState()
     val dailyWeatherViewModel = homeViewModel.dailyWeather.observeAsState()
-    homeViewModel.getCurrentWeather(LocationPermission.locationState.value.latitude
-        , LocationPermission.locationState.value.longitude)
+
+    LaunchedEffect(lat , lon) {
+        if(lat ==0.0 && lon == 0.0){
+            Log.i("TAG", "home checker lat & lon = 0.0 ")
+            homeViewModel.getCurrentWeather(LocationPermission.locationState.value.latitude
+                , LocationPermission.locationState.value.longitude)
+        }else {
+            Log.i("TAG", "home checker not = 0")
+            homeViewModel.getCurrentWeather(lat , lon)
+        }
+    }
+
     homeViewModel.getHourlyWeather()
     homeViewModel.getDailyWeather()
     Column(
         modifier = Modifier
-            .background(currentWeatherViewModel.value?.backgroundColor ?: Color.White )
+            .background(currentWeatherViewModel.value?.backgroundColor ?: Color.White)
             .fillMaxSize()
     ) {
         Spacer(Modifier.height(10.dp))
@@ -547,13 +559,14 @@ fun HourlyWeatherItem(hour: HourlyAndDailyModel) {
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                       hour.backGroundColor
+                        hour.backGroundColor
                     )
             ) {
                 Image(
                     painter = painterResource(hour.icon)
                     , contentDescription = "weather_icon"
-                    , modifier = Modifier.fillMaxWidth()
+                    , modifier = Modifier
+                        .fillMaxWidth()
                         .height(50.dp)
                         .padding(top = 5.dp)
                 )
@@ -614,7 +627,8 @@ fun DailyWeatherItem(daily: HourlyAndDailyModel) {
                 Image(
                     painter = painterResource(daily.icon)
                     , contentDescription = "weather_icon"
-                    , modifier = Modifier.fillMaxWidth()
+                    , modifier = Modifier
+                        .fillMaxWidth()
                         .height(50.dp)
                         .padding(top = 5.dp)
                 )
