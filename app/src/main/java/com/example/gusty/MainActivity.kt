@@ -1,6 +1,8 @@
 package com.example.gusty
 
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.collection.mutableIntSetOf
@@ -32,24 +34,40 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.gusty.data.local.FavoriteDataBase
+import com.example.gusty.data.local.GustyLocalDataSource
 import com.example.gusty.data.remote.GustyRemoteDataSource
 import com.example.gusty.data.remote.RetrofitService
 import com.example.gusty.data.repo.GustyRepoImpl
+import com.example.gusty.favorite.FavoriteFactory
+import com.example.gusty.favorite.FavoriteViewModel
 import com.example.gusty.home.HomeFactory
 import com.example.gusty.home.HomeViewModel
 import com.example.gusty.utilities.ButtonNavyItems
+import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.MyNavGraph
+import com.example.gusty.utilities.Routes
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 class MainActivity : ComponentActivity() {
+    private lateinit var fusedLocationProvider: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             val factory =
-                HomeFactory(GustyRepoImpl.getInstance(GustyRemoteDataSource(RetrofitService.api)))
+                HomeFactory(GustyRepoImpl.getInstance(GustyRemoteDataSource(RetrofitService.api)
+                    , GustyLocalDataSource(FavoriteDataBase.getInstance(this).getProductsDao())))
             val homeViewModel: HomeViewModel = viewModel(factory = factory)
+
+            val favoriteFactory =
+                FavoriteFactory(GustyRepoImpl.getInstance(GustyRemoteDataSource(RetrofitService.api) ,
+                    GustyLocalDataSource(FavoriteDataBase.getInstance(this).getProductsDao())))
+            val favoriteViewModel : FavoriteViewModel = viewModel(factory = favoriteFactory)
 
             val buttonNavItems = listOf(
                 ButtonNavyItems(
@@ -81,7 +99,13 @@ class MainActivity : ComponentActivity() {
                         buttonNavItems.forEachIndexed { index, item ->
                             NavigationBarItem(
                                 selected = navBarState == index,
-                                onClick = { navBarState == index },
+                                onClick = {
+                                    navBarState = index
+                                    when (index) {
+                                        0 -> navController.navigate(Routes.HOME.toString())
+                                        1 -> navController.navigate(Routes.FAVORITE.toString())
+                                    }
+                                },
                                 icon = {
                                     Icon(
                                         imageVector = if (navBarState == index) item.selectedIcon
@@ -96,15 +120,62 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             ) { innerPadding ->
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(innerPadding)
-                    , contentAlignment = Alignment.Center
-                ){
-                    MyNavGraph(navController , homeViewModel)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(innerPadding), contentAlignment = Alignment.Center
+                ) {
+                    MyNavGraph(navController, homeViewModel , favoriteViewModel )
                 }
             }
 
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        fusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
+        if (LocationPermission.CheckPermission(this)) {
+            if (LocationPermission.isLocationEnabled(this)) {
+                LocationPermission.getUpToDateLocation(fusedLocationProvider , context = this)
+                Log.i("TAG", "onStart: location gotted")
+            } else {
+               // enableLocationService()
+            }
+        } else {
+            ActivityCompat.requestPermissions(
+                this, arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ), LocationPermission.REQUEST_LOCATION_CODE
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+        deviceId: Int
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
+        when (requestCode) {
+            LocationPermission.REQUEST_LOCATION_CODE -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    if (LocationPermission.isLocationEnabled(this)) {
+                        LocationPermission.getUpToDateLocation(fusedLocationProvider,this )
+                    } else {
+                      //  enableLocationService()
+                    }
+                } else {
+                    ActivityCompat.requestPermissions(
+                        this, arrayOf(
+                            android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION
+                        ), LocationPermission.REQUEST_LOCATION_CODE
+                    )
+                }
+            }
         }
     }
 }

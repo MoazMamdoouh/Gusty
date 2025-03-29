@@ -6,5 +6,4 @@ data class ButtonNavyItems(
     val title : String ,
     val selectedIcon : ImageVector ,
     val unSelectedIcon : ImageVector ,
-
 )
