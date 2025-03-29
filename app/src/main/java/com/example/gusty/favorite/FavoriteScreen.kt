@@ -91,7 +91,7 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel) {
                     loadingState.value = false
                     LazyColumn {
                         itemsIndexed(listOfFavorite.response) { _, favoriteItem ->
-                            FavoriteItem(favoriteItem)
+                            FavoriteItem(favoriteItem, favoriteViewModel)
                         }
                     }
                 }
@@ -105,7 +105,8 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel) {
 }
 
 @Composable
-fun FavoriteItem(favoriteEntity: FavoriteEntity) {
+fun FavoriteItem(favoriteEntity: FavoriteEntity, favoriteViewModel: FavoriteViewModel) {
+    val openDeleteDialog = remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -142,17 +143,22 @@ fun FavoriteItem(favoriteEntity: FavoriteEntity) {
             )
             Spacer(modifier = Modifier.weight(1f))
             val con = LocalContext.current
-            Image(imageVector = Icons.Default.Favorite
-                , contentDescription = null
-                ,  modifier = Modifier
-                    .padding(end = 10.dp , top = 10.dp)
+            Image(imageVector = Icons.Default.Favorite,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 10.dp, top = 10.dp)
                     .size(24.dp)
                     .clickable {
-
-                        Toast.makeText(con , "Delete" , Toast.LENGTH_LONG).show()
+                        openDeleteDialog.value = true
+                        Toast.makeText(con, "Delete", Toast.LENGTH_LONG).show()
                     }
             )
         }
+        if (openDeleteDialog.value)
+            OpenDeleteFromFavoriteDialog(
+                onDismiss = {
+                    openDeleteDialog.value = false
+                }, favoriteViewModel, favoriteEntity)
     }
 }
 
@@ -251,7 +257,12 @@ fun OpenAddToFavoriteDialog(
                     )
                 }
             }) {
-                Text(if (isRequested) "Loading..." else "Add to Favorite")
+                Text(
+                    if (isRequested) "Loading..." else "Add to Favorite",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
             }
         },
         dismissButton = {
@@ -263,7 +274,48 @@ fun OpenAddToFavoriteDialog(
             Text(text = "Add to favorite")
         },
         text = {
-            Text("Do u want to add this Place to Favorite Places")
+            Text("Do u want to add this Place to Favorite Places" ,
+                fontSize = 20.sp,
+                color = Color.Black)
+        }
+    )
+}
+
+@Composable
+fun OpenDeleteFromFavoriteDialog(
+    onDismiss: () -> Unit,
+    favoriteViewModel: FavoriteViewModel,
+    favoriteEntity: FavoriteEntity
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                favoriteViewModel.deleteLocationFromFavorite(favoriteEntity)
+                onDismiss.invoke()
+            }) {
+                Text("Delete ", color = Color.Red)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        title = {
+            Text(
+                text = "Delete Location",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+        },
+        text = {
+            Text(
+                "Are you sure u want to delete this location ?",
+                fontSize = 20.sp,
+                color = Color.Black
+            )
         }
     )
 }

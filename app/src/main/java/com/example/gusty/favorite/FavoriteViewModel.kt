@@ -68,6 +68,16 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
             }
         }
     }
+
+    fun deleteLocationFromFavorite(favoriteEntity: FavoriteEntity){
+        viewModelScope.launch {
+            try {
+                repo.deleteLocationFromFavorite(favoriteEntity)
+            }catch (e : Exception){
+                Log.i("TAG", "deleteLocationFromFavorite error ${e.message} ")
+            }
+        }
+    }
 }
 
 class FavoriteFactory(val repo: GustyRepo) : ViewModelProvider.Factory {

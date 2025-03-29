@@ -52,6 +52,14 @@ class GustyRepoImpl private constructor(
         }
     }
 
+    override suspend fun deleteLocationFromFavorite(favoriteEntity: FavoriteEntity): Int {
+        return try {
+            gustyLocalDataSource.deleteLocationFromFavorite(favoriteEntity)
+        }catch (e : Exception){
+            0
+        }
+    }
+
 
     companion object {
         private var INSTANCE: GustyRepoImpl? = null
