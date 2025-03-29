@@ -21,7 +21,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
@@ -41,13 +40,15 @@ import com.example.gusty.R
 import com.example.gusty.home.model.CurrentWeatherModel
 import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
 import com.example.gusty.ui.theme.nightColor
+import com.example.gusty.utilities.LocationPermission
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel) {
     val currentWeatherViewModel = homeViewModel.currentWeather.observeAsState()
     val hourlyWeatherViewModel = homeViewModel.hourlyWeather.observeAsState()
     val dailyWeatherViewModel = homeViewModel.dailyWeather.observeAsState()
-    homeViewModel.getCurrentWeather()
+    homeViewModel.getCurrentWeather(LocationPermission.locationState.value.latitude
+        , LocationPermission.locationState.value.longitude)
     homeViewModel.getHourlyWeather()
     homeViewModel.getDailyWeather()
     Column(
@@ -216,7 +217,7 @@ fun DailyAndHourlyWeatherCard(
                         .padding(5.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectOption.value == "Hourly") Color.Blue else Color.Gray,
-                        contentColor = Color.White // Text color
+                        contentColor = Color.White
                     )
                 ) {
                     Text(
@@ -414,10 +415,10 @@ fun CloudCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     .padding(start = 5.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.cloudy_icon), // Replace with your drawable
+                    painter = painterResource(id = R.drawable.cloudy_icon),
                     contentDescription = "Wind Icon",
                     modifier = Modifier.size(32.dp),
-                    colorFilter = ColorFilter.tint(Color.White) // Optional tint
+                    colorFilter = ColorFilter.tint(Color.White)
                 )
                 Text(
                     text = "Clouds",

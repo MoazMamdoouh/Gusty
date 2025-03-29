@@ -37,17 +37,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.gusty.data.local.FavoriteDataBase
+import com.example.gusty.data.local.GustyLocalDataSource
 import com.example.gusty.data.remote.GustyRemoteDataSource
 import com.example.gusty.data.remote.RetrofitService
 import com.example.gusty.data.repo.GustyRepoImpl
+import com.example.gusty.favorite.FavoriteFactory
+import com.example.gusty.favorite.FavoriteViewModel
 import com.example.gusty.home.HomeFactory
 import com.example.gusty.home.HomeViewModel
 import com.example.gusty.utilities.ButtonNavyItems
-import com.example.gusty.utilities.CheckPermission
+import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.MyNavGraph
-import com.example.gusty.utilities.REQUEST_LOCATION_CODE
-import com.example.gusty.utilities.getUpToDateLocation
-import com.example.gusty.utilities.isLocationEnabled
+import com.example.gusty.utilities.Routes
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -58,8 +60,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val factory =
-                HomeFactory(GustyRepoImpl.getInstance(GustyRemoteDataSource(RetrofitService.api)))
+                HomeFactory(GustyRepoImpl.getInstance(GustyRemoteDataSource(RetrofitService.api)
+                    , GustyLocalDataSource(FavoriteDataBase.getInstance(this).getProductsDao())))
             val homeViewModel: HomeViewModel = viewModel(factory = factory)
+
+            val favoriteFactory =
+                FavoriteFactory(GustyRepoImpl.getInstance(GustyRemoteDataSource(RetrofitService.api) ,
+                    GustyLocalDataSource(FavoriteDataBase.getInstance(this).getProductsDao())))
+            val favoriteViewModel : FavoriteViewModel = viewModel(factory = favoriteFactory)
 
             val buttonNavItems = listOf(
                 ButtonNavyItems(
@@ -94,8 +102,8 @@ class MainActivity : ComponentActivity() {
                                 onClick = {
                                     navBarState = index
                                     when (index) {
-                                        0 -> navController.navigate("home_screen")
-                                        1 -> navController.navigate("favorite_screen")
+                                        0 -> navController.navigate(Routes.HOME.toString())
+                                        1 -> navController.navigate(Routes.FAVORITE.toString())
                                     }
                                 },
                                 icon = {
@@ -117,7 +125,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth()
                         .padding(innerPadding), contentAlignment = Alignment.Center
                 ) {
-                    MyNavGraph(navController, homeViewModel)
+                    MyNavGraph(navController, homeViewModel , favoriteViewModel )
                 }
             }
 
@@ -127,9 +135,9 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         fusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
-        if (CheckPermission(this)) {
-            if (isLocationEnabled(this)) {
-                getUpToDateLocation(fusedLocationProvider , context = this)
+        if (LocationPermission.CheckPermission(this)) {
+            if (LocationPermission.isLocationEnabled(this)) {
+                LocationPermission.getUpToDateLocation(fusedLocationProvider , context = this)
                 Log.i("TAG", "onStart: location gotted")
             } else {
                // enableLocationService()
@@ -139,7 +147,7 @@ class MainActivity : ComponentActivity() {
                 this, arrayOf(
                     android.Manifest.permission.ACCESS_FINE_LOCATION,
                     android.Manifest.permission.ACCESS_COARSE_LOCATION
-                ), REQUEST_LOCATION_CODE
+                ), LocationPermission.REQUEST_LOCATION_CODE
             )
         }
     }
@@ -152,10 +160,10 @@ class MainActivity : ComponentActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
         when (requestCode) {
-            REQUEST_LOCATION_CODE -> {
+            LocationPermission.REQUEST_LOCATION_CODE -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    if (isLocationEnabled(this)) {
-                        getUpToDateLocation(fusedLocationProvider,this)
+                    if (LocationPermission.isLocationEnabled(this)) {
+                        LocationPermission.getUpToDateLocation(fusedLocationProvider,this )
                     } else {
                       //  enableLocationService()
                     }
@@ -164,7 +172,7 @@ class MainActivity : ComponentActivity() {
                         this, arrayOf(
                             android.Manifest.permission.ACCESS_FINE_LOCATION,
                             android.Manifest.permission.ACCESS_COARSE_LOCATION
-                        ), REQUEST_LOCATION_CODE
+                        ), LocationPermission.REQUEST_LOCATION_CODE
                     )
                 }
             }
