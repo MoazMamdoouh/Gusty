@@ -11,12 +11,16 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5252)
 
 val gray = Color(0xFF777676)
+
 val blue = Color(0xFF61B1F3)
 val dark_blue = Color(0xFF0456D2)
 
 val nightColor = Color(0xFF031634)
-val whiteNightColor = Color(0xFFBFBFC0)
+val whiteNightColor = Color(0xFF444454)
 
-val orange = Color(0xFFFFA500)
+val orange = Color(0xFFECB042)
 val light_orange = Color(0xFFE1BD7B)
+
+val red = Color(0xFFEE5656)
+val second_red = Color(0xFFA65151)
 
