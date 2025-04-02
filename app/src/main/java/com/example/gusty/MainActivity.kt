@@ -116,6 +116,7 @@ class MainActivity : ComponentActivity() {
                                     when (index) {
                                         0 -> navController.navigate(Routes.HOME.toString())
                                         1 -> navController.navigate(Routes.FAVORITE.toString())
+                                        2 -> navController.navigate(Routes.ALARM.toString())
                                     }
                                 },
                                 icon = {
