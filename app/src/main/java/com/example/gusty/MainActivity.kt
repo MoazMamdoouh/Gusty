@@ -60,14 +60,26 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val factory =
-                HomeFactory(GustyRepoImpl.getInstance(GustyRemoteDataSource(RetrofitService.api)
-                    , GustyLocalDataSource(FavoriteDataBase.getInstance(this).getProductsDao())))
+                HomeFactory(
+                    GustyRepoImpl.getInstance(
+                        GustyRemoteDataSource.getInstance(RetrofitService.api),
+                        GustyLocalDataSource.getInstance(
+                            FavoriteDataBase.getInstance(this).getProductsDao()
+                        )
+                    )
+                )
             val homeViewModel: HomeViewModel = viewModel(factory = factory)
 
             val favoriteFactory =
-                FavoriteFactory(GustyRepoImpl.getInstance(GustyRemoteDataSource(RetrofitService.api) ,
-                    GustyLocalDataSource(FavoriteDataBase.getInstance(this).getProductsDao())))
-            val favoriteViewModel : FavoriteViewModel = viewModel(factory = favoriteFactory)
+                FavoriteFactory(
+                    GustyRepoImpl.getInstance(
+                        GustyRemoteDataSource.getInstance(RetrofitService.api),
+                        GustyLocalDataSource.getInstance(
+                            FavoriteDataBase.getInstance(this).getProductsDao()
+                        )
+                    )
+                )
+            val favoriteViewModel: FavoriteViewModel = viewModel(factory = favoriteFactory)
 
             val buttonNavItems = listOf(
                 ButtonNavyItems(
@@ -125,7 +137,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth()
                         .padding(innerPadding), contentAlignment = Alignment.Center
                 ) {
-                    MyNavGraph(navController, homeViewModel , favoriteViewModel )
+                    MyNavGraph(navController, homeViewModel, favoriteViewModel)
                 }
             }
 
@@ -137,10 +149,10 @@ class MainActivity : ComponentActivity() {
         fusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
         if (LocationPermission.CheckPermission(this)) {
             if (LocationPermission.isLocationEnabled(this)) {
-                LocationPermission.getUpToDateLocation(fusedLocationProvider , context = this)
+                LocationPermission.getUpToDateLocation(fusedLocationProvider, context = this)
                 Log.i("TAG", "onStart: location gotted")
             } else {
-               // enableLocationService()
+                // enableLocationService()
             }
         } else {
             ActivityCompat.requestPermissions(
@@ -163,9 +175,9 @@ class MainActivity : ComponentActivity() {
             LocationPermission.REQUEST_LOCATION_CODE -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                     if (LocationPermission.isLocationEnabled(this)) {
-                        LocationPermission.getUpToDateLocation(fusedLocationProvider,this )
+                        LocationPermission.getUpToDateLocation(fusedLocationProvider, this)
                     } else {
-                      //  enableLocationService()
+                        //  enableLocationService()
                     }
                 } else {
                     ActivityCompat.requestPermissions(

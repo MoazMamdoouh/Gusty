@@ -11,4 +11,5 @@ interface GustyRepo {
     suspend fun getDailyAndHourlyWeather() : Flow<HourlyAndDailyDto>
     suspend fun insertItemToFavorite(favoriteEntity: FavoriteEntity) : Long
     fun getListOfFavoriteItems() : Flow<List<FavoriteEntity>>
+    suspend fun deleteLocationFromFavorite(favoriteEntity: FavoriteEntity) : Int
 }

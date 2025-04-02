@@ -2,8 +2,8 @@ package com.example.gusty.favorite
 
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,20 +24,24 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,6 +49,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gusty.R
 import com.example.gusty.data.local.FavoriteEntity
+import com.example.gusty.home.HomeScreen
+import com.example.gusty.home.HomeViewModel
 import com.example.gusty.ui.theme.gray
 import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.UiStateResult
@@ -56,7 +62,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun FavoriteScreen(favoriteViewModel: FavoriteViewModel) {
+fun FavoriteScreen(favoriteViewModel: FavoriteViewModel , homeViewModel: HomeViewModel) {
     val listOfFavorite = favoriteViewModel.listOfFavorite.collectAsStateWithLifecycle().value
     val loadingState = remember { mutableStateOf(false) }
     val isMapOpen = rememberSaveable { mutableStateOf(false) }
@@ -91,7 +97,7 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel) {
                     loadingState.value = false
                     LazyColumn {
                         itemsIndexed(listOfFavorite.response) { _, favoriteItem ->
-                            FavoriteItem(favoriteItem)
+                            FavoriteItem(favoriteItem, favoriteViewModel , homeViewModel)
                         }
                     }
                 }
@@ -105,12 +111,21 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel) {
 }
 
 @Composable
-fun FavoriteItem(favoriteEntity: FavoriteEntity) {
+fun FavoriteItem(
+    favoriteEntity: FavoriteEntity,
+    favoriteViewModel: FavoriteViewModel,
+    homeViewModel: HomeViewModel
+) {
+    val openDeleteDialog = remember { mutableStateOf(false) }
+    val openButtonSheet = remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(15.dp)
-            .height(80.dp),
+            .height(80.dp)
+            .clickable {
+                openButtonSheet.value = true
+            },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF4E4F4F).copy(alpha = 0.2f))
     ) {
@@ -141,18 +156,26 @@ fun FavoriteItem(favoriteEntity: FavoriteEntity) {
                     .size(width = 20.dp, height = 20.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
-            val con = LocalContext.current
-            Image(imageVector = Icons.Default.Favorite
-                , contentDescription = null
-                ,  modifier = Modifier
-                    .padding(end = 10.dp , top = 10.dp)
+            Image(imageVector = Icons.Default.Favorite,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 10.dp, top = 15.dp)
                     .size(24.dp)
                     .clickable {
-
-                        Toast.makeText(con , "Delete" , Toast.LENGTH_LONG).show()
+                        openDeleteDialog.value = true
                     }
             )
         }
+        if (openDeleteDialog.value)
+            OpenDeleteFromFavoriteDialog(
+                onDismiss = {
+                    openDeleteDialog.value = false
+                }, favoriteViewModel, favoriteEntity)
+        if(openButtonSheet.value) OpenButtonSheet(
+            onDismiss = {
+                openButtonSheet.value = false
+            } , homeViewModel , favoriteEntity
+        )
     }
 }
 
@@ -251,7 +274,44 @@ fun OpenAddToFavoriteDialog(
                     )
                 }
             }) {
-                Text(if (isRequested) "Loading..." else "Add to Favorite")
+                Text(
+                    if (isRequested) "Loading..." else "Add to Favorite",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel" , color = Color.Black)
+            }
+        },
+        title = {
+            Text(text = "Add to favorite" , color = Color.Green )
+        },
+        text = {
+            Text("Do u want to add this Place to Favorite Places" ,
+                fontSize = 20.sp,
+                color = Color.Black)
+        }
+    )
+}
+
+@Composable
+fun OpenDeleteFromFavoriteDialog(
+    onDismiss: () -> Unit,
+    favoriteViewModel: FavoriteViewModel,
+    favoriteEntity: FavoriteEntity
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                favoriteViewModel.deleteLocationFromFavorite(favoriteEntity)
+                onDismiss.invoke()
+            }) {
+                Text("Delete ", color = Color.Red)
             }
         },
         dismissButton = {
@@ -260,14 +320,40 @@ fun OpenAddToFavoriteDialog(
             }
         },
         title = {
-            Text(text = "Add to favorite")
+            Text(
+                text = "Delete Location",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
         },
         text = {
-            Text("Do u want to add this Place to Favorite Places")
+            Text(
+                "Are you sure u want to delete this location ?",
+                fontSize = 20.sp,
+                color = Color.Black
+            )
         }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OpenButtonSheet(
+    onDismiss: () -> Unit,
+    homeViewModel: HomeViewModel,
+    favoriteEntity: FavoriteEntity
+){
+    val buttonSheetState  = rememberModalBottomSheetState()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss ,
+        sheetState = buttonSheetState ,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Log.i("TAG", "in favorite screen lat ${favoriteEntity.lat} & lon ${favoriteEntity.lon} ")
+        HomeScreen(homeViewModel ,favoriteEntity.lat , favoriteEntity.lon )
+    }
+}
 
 
 

@@ -7,12 +7,18 @@ import com.example.gusty.data.model.curren_weather_dto.Rain
 import com.example.gusty.data.model.curren_weather_dto.Weather
 import com.example.gusty.data.model.curren_weather_dto.Wind
 import com.example.gusty.ui.theme.blue
+import com.example.gusty.ui.theme.dark_blue
+import com.example.gusty.ui.theme.light_orange
 import com.example.gusty.ui.theme.nightColor
 import com.example.gusty.ui.theme.orange
+import com.example.gusty.ui.theme.red
+import com.example.gusty.ui.theme.second_red
+import com.example.gusty.ui.theme.whiteNightColor
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
 
 data class CurrentWeatherModel(
     val lat: Double,
@@ -26,13 +32,15 @@ data class CurrentWeatherModel(
     val wind: Wind,
     val rain: Rain?,
     val clouds: Clouds,
-    val backgroundColor: Color
+    val backgroundColor: Color ,
+    val secondBackGroundColor : Color
 )
 
 fun CurrentWeatherDto.mapDtoToModel(): CurrentWeatherModel {
     val timeInHour = convertUnixToHour(dt)
     val timeAsInt = convertHourToInt(timeInHour)
     val backgroundColor = getBackGroundColor(timeAsInt)
+    val secondBackGroundColor = getSecondBackGroundColor(backgroundColor)
     return CurrentWeatherModel(
         lat = coord.lat,
         lon = coord.lon,
@@ -45,7 +53,8 @@ fun CurrentWeatherDto.mapDtoToModel(): CurrentWeatherModel {
         wind = wind,
         rain = rain,
         clouds = clouds,
-        backgroundColor = backgroundColor
+        backgroundColor = backgroundColor ,
+        secondBackGroundColor = secondBackGroundColor
     )
 }
 
@@ -67,8 +76,18 @@ fun getBackGroundColor(time: Int): Color {
     return when (time) {
         in 6..13 -> blue
         in 14..17 -> orange
-        in 18..19 -> Color.Red
+        in 18..19 -> red
         in 20..23, in 0..5 -> nightColor
+        else -> Color.Black
+    }
+}
+
+fun getSecondBackGroundColor(color: Color) : Color{
+    return when(color){
+         blue -> dark_blue
+        orange -> light_orange
+        red -> second_red
+        nightColor -> whiteNightColor
         else -> Color.Black
     }
 }
