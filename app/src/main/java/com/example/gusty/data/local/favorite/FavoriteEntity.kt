@@ -1,4 +1,4 @@
-package com.example.gusty.data.local
+package com.example.gusty.data.local.favorite
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -14,7 +14,7 @@ data class FavoriteEntity (
     val cityName : String,
 
 )
-fun CurrentWeatherDto.convertCurrentDtoToEntity() : FavoriteEntity{
+fun CurrentWeatherDto.convertCurrentDtoToEntity() : FavoriteEntity {
     return FavoriteEntity(
         id = id,
         lat = coord.lat ,

@@ -1,7 +1,6 @@
 package com.example.gusty.data.local
 
-import com.example.gusty.data.remote.Api
-import com.example.gusty.data.remote.GustyRemoteDataSource
+import com.example.gusty.data.local.favorite.FavoriteEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 

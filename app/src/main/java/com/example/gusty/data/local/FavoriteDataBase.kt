@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.gusty.data.local.favorite.FavoriteEntity
 
 @Database(entities = [FavoriteEntity::class], version = 1)
 abstract class FavoriteDataBase : RoomDatabase() {

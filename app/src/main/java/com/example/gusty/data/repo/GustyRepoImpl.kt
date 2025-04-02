@@ -1,7 +1,7 @@
 package com.example.gusty.data.repo
 
 import android.util.Log
-import com.example.gusty.data.local.FavoriteEntity
+import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.data.local.GustyLocalDataSource
 import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
 import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto

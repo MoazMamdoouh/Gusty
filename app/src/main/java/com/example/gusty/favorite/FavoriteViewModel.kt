@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.gusty.data.local.FavoriteEntity
-import com.example.gusty.data.local.convertCurrentDtoToEntity
+import com.example.gusty.data.local.favorite.FavoriteEntity
+import com.example.gusty.data.local.favorite.convertCurrentDtoToEntity
 import com.example.gusty.data.repo.GustyRepo
 import com.example.gusty.utilities.UiStateResult
 import kotlinx.coroutines.flow.MutableStateFlow
