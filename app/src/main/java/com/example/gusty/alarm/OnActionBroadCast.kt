@@ -18,9 +18,9 @@ class OnActionBroadCast : BroadcastReceiver() {
         notificationManager.cancel(request)
 
         if(intent.action == DONE){
-           // androidAlarmManager.cancel(entity)
+           androidAlarmManager.cancel(request)
         }else{
-           // androidAlarmManager.scheduler(entity)
+           androidAlarmManager.scheduler(request , 10000)
         }
     }
 }

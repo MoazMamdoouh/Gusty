@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 data class AlarmEntity(
     @PrimaryKey
     val id : Int ,
-    val startDuration : String ,
+    val datePicked : String ,
+    val timePicked : String ,
     val place : String ,
 )

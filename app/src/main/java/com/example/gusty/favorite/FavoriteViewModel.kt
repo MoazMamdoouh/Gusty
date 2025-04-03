@@ -35,7 +35,6 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
                     .collect { entity ->
                         Log.i("TAG", "view model getCurrentWeatherForFavorite success ")
                         _currentWeather.emit(UiStateResult.Success(entity))
-                        //insertToFavorite(entity)
                     }
             } catch (e: Exception) {
                 _currentWeather.emit(UiStateResult.Failure(e))

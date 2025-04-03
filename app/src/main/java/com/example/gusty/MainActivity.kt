@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.collection.mutableIntSetOf
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +14,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
@@ -28,15 +25,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.gusty.alarm.AlarmFactory
+import com.example.gusty.alarm.AlarmViewModel
 import com.example.gusty.data.local.FavoriteDataBase
 import com.example.gusty.data.local.GustyLocalDataSource
 import com.example.gusty.data.remote.GustyRemoteDataSource
@@ -64,7 +61,8 @@ class MainActivity : ComponentActivity() {
                     GustyRepoImpl.getInstance(
                         GustyRemoteDataSource.getInstance(RetrofitService.api),
                         GustyLocalDataSource.getInstance(
-                            FavoriteDataBase.getInstance(this).getProductsDao()
+                            FavoriteDataBase.getInstance(this).getProductsDao(),
+                            FavoriteDataBase.getInstance(this).getAlarmDao()
                         )
                     )
                 )
@@ -75,11 +73,24 @@ class MainActivity : ComponentActivity() {
                     GustyRepoImpl.getInstance(
                         GustyRemoteDataSource.getInstance(RetrofitService.api),
                         GustyLocalDataSource.getInstance(
-                            FavoriteDataBase.getInstance(this).getProductsDao()
+                            FavoriteDataBase.getInstance(this).getProductsDao(),
+                            FavoriteDataBase.getInstance(this).getAlarmDao()
                         )
                     )
                 )
             val favoriteViewModel: FavoriteViewModel = viewModel(factory = favoriteFactory)
+
+            val alarmFactory =
+                AlarmFactory(
+                    GustyRepoImpl.getInstance(
+                        GustyRemoteDataSource.getInstance(RetrofitService.api),
+                        GustyLocalDataSource.getInstance(
+                            FavoriteDataBase.getInstance(this).getProductsDao(),
+                            FavoriteDataBase.getInstance(this).getAlarmDao()
+                        )
+                    )
+                )
+            val alarmViewModel : AlarmViewModel = viewModel(factory = alarmFactory)
 
             val buttonNavItems = listOf(
                 ButtonNavyItems(
@@ -138,15 +149,16 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth()
                         .padding(innerPadding), contentAlignment = Alignment.Center
                 ) {
-                    MyNavGraph(navController, homeViewModel, favoriteViewModel)
+                    MyNavGraph(navController, homeViewModel, favoriteViewModel , alarmViewModel)
                 }
             }
 
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
+
         fusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
         if (LocationPermission.CheckPermission(this)) {
             if (LocationPermission.isLocationEnabled(this)) {

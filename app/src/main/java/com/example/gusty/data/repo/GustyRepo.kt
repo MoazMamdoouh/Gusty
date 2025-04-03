@@ -1,5 +1,6 @@
 package com.example.gusty.data.repo
 
+import com.example.gusty.data.local.alarm.AlarmEntity
 import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
 import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto
@@ -12,4 +13,7 @@ interface GustyRepo {
     suspend fun insertItemToFavorite(favoriteEntity: FavoriteEntity) : Long
     fun getListOfFavoriteItems() : Flow<List<FavoriteEntity>>
     suspend fun deleteLocationFromFavorite(favoriteEntity: FavoriteEntity) : Int
+    suspend fun insertAlarmToDataBase(alarmEntity: AlarmEntity) : Long
+    fun getAllAlarmsFromDataBase() : Flow<List<AlarmEntity>>
+    suspend fun deleteAlarmFromDataBase(alarmEntity: AlarmEntity) : Int
 }

@@ -56,7 +56,16 @@ fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double 
     val hourlyWeatherViewModel = homeViewModel.hourlyWeather.observeAsState()
     val dailyWeatherViewModel = homeViewModel.dailyWeather.observeAsState()
     val scrollState = rememberScrollState()
+    val backGround = remember { mutableStateOf<Color>(Color.White) }
+    val secondBackGround = remember { mutableStateOf<Color>(Color.White) }
 
+    LaunchedEffect(
+        currentWeatherViewModel.value?.backgroundColor ,
+        currentWeatherViewModel.value?.secondBackGroundColor
+    ) {
+        backGround.value = currentWeatherViewModel.value?.backgroundColor ?: Color.White
+        secondBackGround.value =  currentWeatherViewModel.value?.secondBackGroundColor ?: Color.White
+    }
     LaunchedEffect(lat , lon) {
         if(lat ==0.0 && lon == 0.0){
             Log.i("TAG", "home checker lat & lon = 0.0 ")
@@ -75,8 +84,7 @@ fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double 
             .verticalScroll(scrollState)
             .background(
                 brush = Brush.verticalGradient(
-                    listOf(currentWeatherViewModel.value?.backgroundColor ?: Color.White ,
-                        currentWeatherViewModel.value?.secondBackGroundColor ?: Color.White)
+                    listOf(backGround.value , secondBackGround.value)
                 )
             )
             .fillMaxSize()

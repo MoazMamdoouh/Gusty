@@ -88,7 +88,6 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel , homeViewModel: HomeVie
                     "TAG",
                     "FavoriteScreen: ${listOfFavorite.exception.message} "
                 )
-
                 UiStateResult.Loading -> loadingState.value = true
                 is UiStateResult.Success -> {
                     loadingState.value = false
