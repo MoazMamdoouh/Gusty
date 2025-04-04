@@ -27,9 +27,9 @@ class GustyRepoImpl private constructor(
         }
     }
 
-    override suspend fun getDailyAndHourlyWeather(): Flow<HourlyAndDailyDto> {
+    override suspend fun getDailyAndHourlyWeather(latitude: Double, longitude: Double): Flow<HourlyAndDailyDto> {
         return try {
-            weatherRemoteDataSource.getHourlyAndDailyWeather()
+            weatherRemoteDataSource.getHourlyAndDailyWeather(latitude , longitude)
         } catch (e: Exception) {
             Log.i("TAG", "getDailyAndHourlyWeather repo : error ")
             flowOf()

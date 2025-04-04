@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gusty.R
 import com.example.gusty.home.model.CurrentWeatherModel
 import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
@@ -49,64 +50,63 @@ import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.dark_blue
 import com.example.gusty.ui.theme.nightColor
 import com.example.gusty.utilities.LocationPermission
+import com.example.gusty.utilities.UiStateResult
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double = 0.0) {
-    val currentWeatherViewModel = homeViewModel.currentWeather.observeAsState()
+    val currentWeatherViewModel = homeViewModel.currentWeather.collectAsStateWithLifecycle().value
     val hourlyWeatherViewModel = homeViewModel.hourlyWeather.observeAsState()
     val dailyWeatherViewModel = homeViewModel.dailyWeather.observeAsState()
     val scrollState = rememberScrollState()
-    val backGround = remember { mutableStateOf<Color>(Color.White) }
-    val secondBackGround = remember { mutableStateOf<Color>(Color.White) }
 
-    LaunchedEffect(
-        currentWeatherViewModel.value?.backgroundColor ,
-        currentWeatherViewModel.value?.secondBackGroundColor
-    ) {
-        backGround.value = currentWeatherViewModel.value?.backgroundColor ?: Color.White
-        secondBackGround.value =  currentWeatherViewModel.value?.secondBackGroundColor ?: Color.White
-    }
-    LaunchedEffect(lat , lon) {
-        if(lat ==0.0 && lon == 0.0){
-            Log.i("TAG", "home checker lat & lon = 0.0 ")
-            homeViewModel.getCurrentWeather(LocationPermission.locationState.value.latitude
-                , LocationPermission.locationState.value.longitude)
-        }else {
-            Log.i("TAG", "home checker not = 0")
-            homeViewModel.getCurrentWeather(lat , lon)
-        }
+    val finalLat = if (lat == 0.0) LocationPermission.locationState.value.latitude else lat
+    val finalLon = if (lon == 0.0) LocationPermission.locationState.value.longitude else lon
+
+    LaunchedEffect(finalLat, finalLon) {
+        Log.i("TAG", "Fetching weather for lat: $finalLat, lon: $finalLon")
+        homeViewModel.getCurrentWeather(finalLat, finalLon)
+        homeViewModel.getHourlyWeather(finalLat,finalLon)
+        homeViewModel.getDailyWeather(finalLat,finalLon)
     }
 
-    homeViewModel.getHourlyWeather()
-    homeViewModel.getDailyWeather()
-    Column(
-        modifier = Modifier
-            .verticalScroll(scrollState)
-            .background(
-                brush = Brush.verticalGradient(
-                    listOf(backGround.value , secondBackGround.value)
-                )
-            )
-            .fillMaxSize()
-    ) {
-        Spacer(Modifier.height(10.dp))
-        DailyWeatherInfoCard(currentWeatherViewModel)
-        Spacer(Modifier.height(10.dp))
-        DailyAndHourlyWeatherCard(hourlyWeatherViewModel , dailyWeatherViewModel)
-        Spacer(Modifier.height(10.dp))
-        Row {
-            WindCard(currentWeatherViewModel)
-            RainCard(currentWeatherViewModel)
-        }
-        Spacer(Modifier.height(5.dp))
-        Row {
-            CloudCard(currentWeatherViewModel)
-            PressureCard(currentWeatherViewModel)
+    when(currentWeatherViewModel){
+        is UiStateResult.Failure -> Log.i("TAG", "HomeScreen failure in UI state ")
+        is UiStateResult.Loading -> Log.i("TAG", "HomeScreen Loading in UI state ")
+        is UiStateResult.Success -> {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(scrollState)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                currentWeatherViewModel.response.backgroundColor,
+                                currentWeatherViewModel.response.secondBackGroundColor
+                            )
+                        )
+                    )
+                    .fillMaxSize()
+            ) {
+                Spacer(Modifier.height(10.dp))
+                DailyWeatherInfoCard(currentWeatherViewModel.response)
+                Spacer(Modifier.height(10.dp))
+                DailyAndHourlyWeatherCard(hourlyWeatherViewModel , dailyWeatherViewModel)
+                Spacer(Modifier.height(10.dp))
+                Row {
+                    WindCard(currentWeatherViewModel.response)
+                    RainCard(currentWeatherViewModel.response)
+                }
+                Spacer(Modifier.height(5.dp))
+                Row {
+                    CloudCard(currentWeatherViewModel.response)
+                    PressureCard(currentWeatherViewModel.response)
+                }
+            }
         }
     }
+
 }
 @Composable
-fun DailyWeatherInfoCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
+fun DailyWeatherInfoCard(currentWeatherViewModel: CurrentWeatherModel ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,14 +114,14 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
 
         Column(modifier = Modifier.padding(top = 10.dp, start = 5.dp)) {
             Row {
-                currentWeatherViewModel.value?.let {
+                currentWeatherViewModel.let {
                     Text(
                         it.countryName, fontSize = 20.sp, modifier = Modifier
                             .padding(top = 15.dp), color = Color.White, fontWeight = FontWeight.Bold
                     )
                 }
                 Text(
-                    " , ${currentWeatherViewModel.value?.cityName}",
+                    " , ${currentWeatherViewModel.cityName}",
                     fontSize = 20.sp,
                     modifier = Modifier
                         .padding(top = 15.dp),
@@ -139,7 +139,7 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
             }
             Row {
                 Text(
-                    "${currentWeatherViewModel.value?.main?.temperature}",
+                    "${currentWeatherViewModel.main.temperature}",
                     fontSize = 70.sp,
                     modifier = Modifier
                         .padding(top = 10.dp, start = 5.dp),
@@ -150,7 +150,7 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     text = "C", modifier = Modifier.padding(5.dp), color = Color.White
                 )
             }
-            currentWeatherViewModel.value?.weather?.get(0)?.description?.let {
+            currentWeatherViewModel.weather.get(0).description.let {
                 Text(
                     text = it,
                     modifier =
@@ -164,7 +164,7 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
             Column {
                 Row {
                     Text(
-                        "${currentWeatherViewModel.value?.main?.minimumTemperature}",
+                        "${currentWeatherViewModel.main.minimumTemperature}",
                         fontSize = 20.sp,
                         modifier = Modifier
                             .padding(top = 15.dp, start = 10.dp),
@@ -179,7 +179,7 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                             .padding(top = 15.dp), color = Color.White
                     )
                     Text(
-                        "${currentWeatherViewModel.value?.main?.maximumTemperature}",
+                        "${currentWeatherViewModel.main.maximumTemperature}",
                         fontSize = 20.sp,
                         modifier = Modifier
                             .padding(top = 15.dp),
@@ -198,7 +198,7 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "${currentWeatherViewModel.value?.main?.feelsLike}",
+                        "${currentWeatherViewModel.main.feelsLike}",
                         fontSize = 20.sp,
                         modifier = Modifier
                             .padding(top = 15.dp, start = 5.dp),
@@ -281,7 +281,7 @@ fun DailyAndHourlyWeatherCard(
     }
 }
 @Composable
-fun WindCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
+fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
     Card(
         modifier = Modifier
             .width(200.dp)
@@ -326,7 +326,7 @@ fun WindCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = " ${currentWeatherViewModel.value?.wind?.speed} km/h",
+                    text = " ${currentWeatherViewModel.wind.speed} km/h",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -343,7 +343,7 @@ fun WindCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${currentWeatherViewModel.value?.wind?.deg}",
+                    text = "${currentWeatherViewModel.wind.deg}",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -361,7 +361,7 @@ fun WindCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = " ${currentWeatherViewModel.value?.wind?.gust} m/s",
+                    text = " ${currentWeatherViewModel.wind.gust} m/s",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -371,7 +371,7 @@ fun WindCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
     }
 }
 @Composable
-fun RainCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
+fun RainCard(currentWeatherViewModel: CurrentWeatherModel) {
     Card(
         modifier = Modifier
             .width(150.dp)
@@ -393,10 +393,10 @@ fun RainCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     .padding(start = 5.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.rain_icon), // Replace with your drawable
+                    painter = painterResource(id = R.drawable.rain_icon),
                     contentDescription = "Wind Icon",
                     modifier = Modifier.size(32.dp),
-                    colorFilter = ColorFilter.tint(Color.White) // Optional tint
+                    colorFilter = ColorFilter.tint(Color.White)
                 )
                 Text(
                     text = "Rain",
@@ -416,7 +416,7 @@ fun RainCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = " ${currentWeatherViewModel.value?.rain} km/h",
+                    text = " ${currentWeatherViewModel.rain} km/h",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -426,7 +426,7 @@ fun RainCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
     }
 }
 @Composable
-fun CloudCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
+fun CloudCard(currentWeatherViewModel: CurrentWeatherModel) {
     Card(
         modifier = Modifier
             .width(150.dp)
@@ -471,7 +471,7 @@ fun CloudCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = " ${currentWeatherViewModel.value?.clouds?.all} %",
+                    text = " ${currentWeatherViewModel.clouds.all} %",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -481,7 +481,7 @@ fun CloudCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
     }
 }
 @Composable
-fun PressureCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
+fun PressureCard(currentWeatherViewModel: CurrentWeatherModel) {
     Card(
         modifier = Modifier
             .width(190.dp)
@@ -503,10 +503,10 @@ fun PressureCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     .padding(start = 5.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.pressure_icon), // Replace with your drawable
+                    painter = painterResource(id = R.drawable.pressure_icon),
                     contentDescription = "Wind Icon",
                     modifier = Modifier.size(32.dp),
-                    colorFilter = ColorFilter.tint(Color.White) // Optional tint
+                    colorFilter = ColorFilter.tint(Color.White)
                 )
                 Text(
                     text = "Pressure",
@@ -526,7 +526,7 @@ fun PressureCard(currentWeatherViewModel: State<CurrentWeatherModel?>) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = " ${currentWeatherViewModel.value?.main?.pressure} hPa",
+                    text = " ${currentWeatherViewModel.main.pressure} hPa",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
