@@ -105,4 +105,57 @@ dependencies {
     // KTX for the Maps SDK for Android Utility Library
     implementation ("com.google.maps.android:maps-utils-ktx:3.2.1")
 
+    val androidXTestCoreVersion = "1.6.1"
+    val androidXTestExtKotlinRunnerVersion = "1.1.3"
+    val archTestingVersion = "2.2.0"
+    val coroutinesVersion = "1.5.2"
+    val espressoVersion = "3.4.0"
+    val hamcrestVersion = "1.3"
+    val junitVersion = "4.13.2"
+    val robolectricVersion = "4.5.1"
+
+    // Dependencies for local unit tests
+    testImplementation ("junit:junit:$junitVersion")
+    testImplementation ("org.hamcrest:hamcrest-all:$hamcrestVersion")
+    testImplementation ("androidx.arch.core:core-testing:$archTestingVersion")
+    testImplementation ("org.robolectric:robolectric:$robolectricVersion")
+
+    // AndroidX Test - JVM testing
+    testImplementation ("androidx.test:core-ktx:$androidXTestCoreVersion")
+    //testImplementation "androidx.test.ext:junit:$androidXTestExtKotlinRunnerVersion"
+
+    // AndroidX Test - Instrumented testing
+    androidTestImplementation ("androidx.test:core:$androidXTestExtKotlinRunnerVersion")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:$espressoVersion")
+    androidTestImplementation ("androidx.arch.core:core-testing:$archTestingVersion")
+
+    //Timber
+    implementation ("com.jakewharton.timber:timber:5.0.1")
+
+    // hamcrest
+    testImplementation ("org.hamcrest:hamcrest:2.2")
+    testImplementation ("org.hamcrest:hamcrest-library:2.2")
+    androidTestImplementation ("org.hamcrest:hamcrest:2.2")
+    androidTestImplementation ("org.hamcrest:hamcrest-library:2.2")
+
+    // AndroidX and Robolectric
+    testImplementation ("androidx.test.ext:junit-ktx:$androidXTestExtKotlinRunnerVersion")
+    testImplementation ("androidx.test:core-ktx:$androidXTestCoreVersion")
+    testImplementation ("org.robolectric:robolectric:4.11")
+
+    // InstantTaskExecutorRule
+    testImplementation ("androidx.arch.core:core-testing:2.1.0")
+    androidTestImplementation ("androidx.arch.core:core-testing:2.1.0")
+
+    //kotlinx-coroutines
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+
+
+    //MockK
+    testImplementation ("io.mockk:mockk-android:1.13.17")
+    testImplementation ("io.mockk:mockk-agent:1.13.17")
+
+
 }

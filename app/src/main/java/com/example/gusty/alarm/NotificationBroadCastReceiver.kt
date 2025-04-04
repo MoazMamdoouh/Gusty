@@ -17,8 +17,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.example.gusty.R
 import com.example.gusty.data.local.FavoriteDataBase
-import com.example.gusty.data.local.GustyLocalDataSource
-import com.example.gusty.data.remote.GustyRemoteDataSource
+import com.example.gusty.data.local.GustyLocalDataSourceImpl
+import com.example.gusty.data.remote.GustyRemoteDataSourceImpl
 import com.example.gusty.data.remote.RetrofitService
 import com.example.gusty.data.repo.GustyRepoImpl
 import com.example.gusty.home.model.mapDtoToModel
@@ -38,14 +38,15 @@ class NotificationBroadCastReceiver : BroadcastReceiver() {
             val weather = runBlocking {
                 Log.i("TAG", "on run block ")
                 val repo = GustyRepoImpl.getInstance(
-                    GustyRemoteDataSource.getInstance(RetrofitService.api),
-                    GustyLocalDataSource.getInstance(
+                    GustyRemoteDataSourceImpl.getInstance(RetrofitService.api),
+                    GustyLocalDataSourceImpl.getInstance(
                         FavoriteDataBase.getInstance(context).getProductsDao() ,
                         FavoriteDataBase.getInstance(context).getAlarmDao()
                     )
                 )
                 repo.getCurrentWeather(LocationPermission.locationState.value.latitude ,
-                    LocationPermission.locationState.value.longitude , UnitPreference.getUnitSharedPreference(context) ?: "metric")
+                    LocationPermission.locationState.value.longitude
+                    , UnitPreference.getUnitSharedPreference(context) ?: "metric")
                     .map { dto -> dto.mapDtoToModel() }
                     .first()
             }
@@ -58,18 +59,9 @@ class NotificationBroadCastReceiver : BroadcastReceiver() {
             val content = " In ${weather.cityName} Temperature is ${weather.main.temperature}  "
             val request = intent?.getIntExtra("id", 0) ?: 0
             val channelId = "weather_not"
+
             createNotificationChannel(context, channelId)
 
-            /*  val alertNotificationIntent = Intent(context, MainActivity::class.java).apply {
-                  flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-              }
-              val pendingIntent: PendingIntent =
-                  PendingIntent.getActivity(
-                      context,
-                      0,
-                      alertNotificationIntent,
-                      PendingIntent.FLAG_IMMUTABLE
-                  )*/
             val doneIntent = Intent(context, OnActionBroadCast::class.java).apply {
                 action = DONE
                 putExtra("request", request)

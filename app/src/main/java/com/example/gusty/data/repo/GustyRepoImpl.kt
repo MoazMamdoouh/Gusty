@@ -1,12 +1,14 @@
 package com.example.gusty.data.repo
 
 import android.util.Log
-import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.data.local.GustyLocalDataSource
+import com.example.gusty.data.local.favorite.FavoriteEntity
+import com.example.gusty.data.local.GustyLocalDataSourceImpl
 import com.example.gusty.data.local.alarm.AlarmEntity
 import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
 import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto
 import com.example.gusty.data.remote.GustyRemoteDataSource
+import com.example.gusty.data.remote.GustyRemoteDataSourceImpl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -91,10 +93,10 @@ class GustyRepoImpl private constructor(
     companion object {
         private var INSTANCE: GustyRepoImpl? = null
         fun getInstance(
-            gustyRemoteDataSource: GustyRemoteDataSource, gustyLocalDataSource: GustyLocalDataSource
+            gustyRemoteDataSourceImpl: GustyRemoteDataSource, gustyLocalDataSourceImpl: GustyLocalDataSource
         ): GustyRepoImpl {
             return INSTANCE ?: synchronized(this) {
-                val temp = GustyRepoImpl(gustyRemoteDataSource, gustyLocalDataSource)
+                val temp = GustyRepoImpl(gustyRemoteDataSourceImpl, gustyLocalDataSourceImpl)
                 INSTANCE = temp
                 temp
             }
