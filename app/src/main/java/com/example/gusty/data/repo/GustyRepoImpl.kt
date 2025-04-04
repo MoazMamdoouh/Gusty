@@ -1,8 +1,9 @@
 package com.example.gusty.data.repo
 
 import android.util.Log
-import com.example.gusty.data.local.FavoriteEntity
+import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.data.local.GustyLocalDataSource
+import com.example.gusty.data.local.alarm.AlarmEntity
 import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
 import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto
 import com.example.gusty.data.remote.GustyRemoteDataSource
@@ -26,9 +27,9 @@ class GustyRepoImpl private constructor(
         }
     }
 
-    override suspend fun getDailyAndHourlyWeather(): Flow<HourlyAndDailyDto> {
+    override suspend fun getDailyAndHourlyWeather(latitude: Double, longitude: Double): Flow<HourlyAndDailyDto> {
         return try {
-            weatherRemoteDataSource.getHourlyAndDailyWeather()
+            weatherRemoteDataSource.getHourlyAndDailyWeather(latitude , longitude)
         } catch (e: Exception) {
             Log.i("TAG", "getDailyAndHourlyWeather repo : error ")
             flowOf()
@@ -57,6 +58,31 @@ class GustyRepoImpl private constructor(
             gustyLocalDataSource.deleteLocationFromFavorite(favoriteEntity)
         }catch (e : Exception){
             0
+        }
+    }
+
+    override suspend fun insertAlarmToDataBase(alarmEntity: AlarmEntity): Long {
+        return try {
+            gustyLocalDataSource.insertAlarmToDataBase(alarmEntity)
+        }catch (e : Exception){
+            Log.i("TAG", "insertAlarmToDataBase repo  error ${e.message}")
+                -1
+        }
+    }
+
+    override fun getAllAlarmsFromDataBase(): Flow<List<AlarmEntity>> {
+        return try {
+            gustyLocalDataSource.getAllAlarmsFromDataBase()
+        }catch (e : Exception){
+            flowOf()
+        }
+    }
+
+    override suspend fun deleteAlarmFromDataBase(alarmEntity: AlarmEntity): Int {
+        return try {
+            gustyLocalDataSource.deleteAlarmFromDataBase(alarmEntity)
+        }catch (e : Exception){
+            -1
         }
     }
 

@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.gusty.data.local.FavoriteEntity
-import com.example.gusty.data.local.convertCurrentDtoToEntity
+import com.example.gusty.data.local.favorite.FavoriteEntity
+import com.example.gusty.data.local.favorite.convertCurrentDtoToEntity
 import com.example.gusty.data.repo.GustyRepo
 import com.example.gusty.utilities.UiStateResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +35,6 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
                     .collect { entity ->
                         Log.i("TAG", "view model getCurrentWeatherForFavorite success ")
                         _currentWeather.emit(UiStateResult.Success(entity))
-                        //insertToFavorite(entity)
                     }
             } catch (e: Exception) {
                 _currentWeather.emit(UiStateResult.Failure(e))

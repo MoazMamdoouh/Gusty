@@ -1,4 +1,4 @@
-package com.example.gusty.data.local
+package com.example.gusty.data.local.favorite
 
 import androidx.room.Dao
 import androidx.room.Delete

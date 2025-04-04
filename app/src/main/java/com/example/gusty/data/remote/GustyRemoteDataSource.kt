@@ -18,9 +18,9 @@ class GustyRemoteDataSource private constructor(private val api : Api) {
        }
     }
 
-    suspend fun getHourlyAndDailyWeather() : Flow<HourlyAndDailyDto>{
+    suspend fun getHourlyAndDailyWeather(lat : Double , lon : Double) : Flow<HourlyAndDailyDto>{
         return try {
-            val hourlyAndDailyResponse = api.getHourlyAndDailyWeather()
+            val hourlyAndDailyResponse = api.getHourlyAndDailyWeather(lat , lon)
             flowOf(hourlyAndDailyResponse)
         }catch (e : Exception){
             flowOf()

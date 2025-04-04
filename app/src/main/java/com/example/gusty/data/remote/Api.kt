@@ -16,8 +16,8 @@ interface Api {
 
     @GET("forecast")
     suspend fun getHourlyAndDailyWeather(
-        @Query("lat") lat: Double =30.0529,
-        @Query("lon") lon: Double = 31.3436,
+        @Query("lat") lat: Double ,
+        @Query("lon") lon: Double ,
         @Query("appid") apiKey: String = "b753d8e898af2c2c8235d35152cf5139"
     ) : HourlyAndDailyDto
 }
