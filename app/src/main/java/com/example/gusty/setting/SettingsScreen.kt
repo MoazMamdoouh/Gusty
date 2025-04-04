@@ -1,6 +1,6 @@
 package com.example.gusty.setting
 
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -42,7 +45,8 @@ fun SettingScreen(navController: NavHostController) {
     Column {
         LanguageCard()
         LocationCard(navController)
-
+        UnitCard()
+        WindSettingsCard()
     }
 }
 
@@ -71,7 +75,7 @@ fun LanguageCard() {
                 "English (Default) :  ",
                 color = Color.White,
                 fontSize = 18.sp,
-                modifier = Modifier.padding( top = 13.dp , start = 10.dp)
+                modifier = Modifier.padding(top = 13.dp, start = 10.dp)
             )
             Switch(
                 modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
@@ -99,8 +103,8 @@ fun LanguageCard() {
             Spacer(Modifier.width(8.dp))
             Text(
                 "Arabic :", color = Color.White,
-                fontSize = 18.sp ,
-                modifier = Modifier.padding(top = 13.dp )
+                fontSize = 18.sp,
+                modifier = Modifier.padding(top = 13.dp)
             )
             Switch(
                 modifier = Modifier.padding(start = 5.dp),
@@ -129,17 +133,16 @@ fun LanguageCard() {
     }
 }
 
-
 @Composable
 fun LocationCard(navController: NavHostController) {
     var gpsChecked by remember { mutableStateOf(true) }
     var locationChecked by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    if(Preference.getLocationStateSharedPreference(context).equals("gps")){
+    if (Preference.getLocationStateSharedPreference(context).equals("gps")) {
         gpsChecked = true
-    }else {
-        gpsChecked =  false
+    } else {
+        gpsChecked = false
     }
 
     Card(
@@ -163,13 +166,13 @@ fun LocationCard(navController: NavHostController) {
                 " GPS : ",
                 color = Color.White,
                 fontSize = 18.sp,
-                modifier = Modifier.padding( top = 13.dp , start = 10.dp)
+                modifier = Modifier.padding(top = 13.dp, start = 10.dp)
             )
             Switch(
                 modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
                 checked = gpsChecked,
                 onCheckedChange = {
-                    Preference.setLocationStateSharedPreference("gps" , context)
+                    Preference.setLocationStateSharedPreference("gps", context)
                     gpsChecked = it
                 }, thumbContent = if (gpsChecked) {
                     {
@@ -192,18 +195,21 @@ fun LocationCard(navController: NavHostController) {
             Spacer(Modifier.width(8.dp))
             Text(
                 "Location :", color = Color.White,
-                fontSize = 18.sp ,
+                fontSize = 18.sp,
                 modifier = Modifier.padding(top = 13.dp)
             )
             Switch(
                 modifier = Modifier.padding(start = 5.dp),
                 checked = locationChecked,
                 onCheckedChange = {
-                    if(it){
-                        Preference.setLocationStateSharedPreference("location" , context)
+                    if (it) {
+                        Preference.setLocationStateSharedPreference("location", context)
                     }
                     locationChecked = it
-                }, thumbContent = if (Preference.getLocationStateSharedPreference(context).equals("Location")) {
+                },
+                thumbContent = if (Preference.getLocationStateSharedPreference(context)
+                        .equals("Location")
+                ) {
                     {
                         Icon(
                             imageVector = Icons.Filled.Check,
@@ -221,15 +227,124 @@ fun LocationCard(navController: NavHostController) {
                     uncheckedTrackColor = blue
                 )
             )
-            if(Preference.getLocationStateSharedPreference(context).equals("gps")){
-                Preference.setLatitudeSharedPreference(LocationPermission.locationState.value.latitude , context)
-                Preference.setLongitudeSharedPreference(LocationPermission.locationState.value.longitude , context)
+            if (Preference.getLocationStateSharedPreference(context).equals("gps")) {
+                Preference.setLatitudeSharedPreference(
+                    LocationPermission.locationState.value.latitude,
+                    context
+                )
+                Preference.setLongitudeSharedPreference(
+                    LocationPermission.locationState.value.longitude,
+                    context
+                )
             }
-            if(locationChecked){
+            if (locationChecked) {
                 navController.navigate(Routes.SETTINGS_MAP.toString())
                 locationChecked = false
             }
 
         }
     }
+}
+
+@Composable
+fun UnitCard() {
+    //celsius and fahrenheit and kelvin
+    val context = LocalContext.current
+    val initUnit = when(UnitPreference.getUnitSharedPreference(context)){
+        "metric" -> UnitEnum.CELSIUS
+        "imperial" -> UnitEnum.FAHRENHEIT
+        "standard" -> UnitEnum.KELVIN
+        else -> UnitEnum.KELVIN
+    }
+    var selectedUnit by remember { mutableStateOf<UnitEnum>(initUnit) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp), shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF4E4F4F).copy(alpha = 0.2f)) // Light Blue Transparent
+    ) {
+        Text(
+            "Unit",
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.padding(10.dp)
+        )
+        Spacer(Modifier.height(5.dp))
+        Row {
+            Spacer(Modifier.width(9.dp))
+            FilterChip(
+                onClick = {
+                    UnitPreference.setUnitSharedPreference("metric", context)
+                    selectedUnit = UnitEnum.CELSIUS
+                },
+                label = {
+                    Text("Celsius")
+                },
+                selected = selectedUnit == UnitEnum.CELSIUS,
+                leadingIcon = if (selectedUnit == UnitEnum.CELSIUS) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else {
+                    null
+                },
+            )
+            Spacer(Modifier.width(9.dp))
+            FilterChip(
+                onClick = {
+                    UnitPreference.setUnitSharedPreference("imperial", context)
+                    selectedUnit = UnitEnum.FAHRENHEIT
+                },
+                label = {
+                    Text("Fahrenheit")
+                },
+                selected = selectedUnit == UnitEnum.FAHRENHEIT,
+                leadingIcon = if (selectedUnit == UnitEnum.FAHRENHEIT) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else {
+                    null
+                },
+            )
+            Spacer(Modifier.width(9.dp))
+            FilterChip(
+                onClick = {
+                    UnitPreference.setUnitSharedPreference("standard" , context)
+                    selectedUnit = UnitEnum.KELVIN
+                },
+                label = {
+                    Text("Kelvin")
+                },
+                selected = selectedUnit == UnitEnum.KELVIN,
+                leadingIcon = if (selectedUnit == UnitEnum.KELVIN) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else {
+                    null
+                },
+            )
+        }
+    }
+}
+
+
+@Composable
+fun WindSettingsCard() {
+
 }

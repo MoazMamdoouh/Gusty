@@ -24,10 +24,10 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
         MutableStateFlow(UiStateResult.Loading)
     val listOfFavorite  = _listOfFavorite.asStateFlow()
 
-    fun getCurrentWeatherForFavorite(latitude: Double, longitude: Double) {
+    fun getCurrentWeatherForFavorite(latitude: Double, longitude: Double , unit : String) {
         viewModelScope.launch {
             try {
-                repo.getCurrentWeather(latitude, longitude)
+                repo.getCurrentWeather(latitude, longitude , unit )
                     .map { dto -> dto.convertCurrentDtoToEntity() }
                     .catch { throwable ->
                         _currentWeather.emit(UiStateResult.Failure(throwable))

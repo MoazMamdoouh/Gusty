@@ -24,7 +24,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
@@ -58,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gusty.R
 import com.example.gusty.data.local.alarm.AlarmEntity
+import com.example.gusty.setting.UnitPreference
 import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.gray
 import com.example.gusty.utilities.LocationPermission
@@ -244,7 +244,8 @@ fun OpenButtonSheet(
                 onClick = {
                     alarmViewModel.getCurrentWeather(
                         LocationPermission.locationState.value.latitude,
-                        LocationPermission.locationState.value.longitude
+                        LocationPermission.locationState.value.longitude ,
+                        UnitPreference.getUnitSharedPreference(context) ?: "metric"
                     )
                     when (currentWeather) {
                         is UiStateResult.Loading -> {

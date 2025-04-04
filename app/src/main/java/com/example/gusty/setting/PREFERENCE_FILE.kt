@@ -2,19 +2,19 @@ package com.example.gusty.setting
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.runtime.MutableState
 
 
-object Preference{
+object Preference {
 
     @SuppressLint("CommitPrefEdits")
     fun setLatitudeSharedPreference(lat: Double, context: Context) {
         val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
-        with(sharedPref.edit()){
+        with(sharedPref.edit()) {
             putFloat("latitude", lat.toFloat())
             apply()
         }
     }
+
     fun getLatitudeSharedPreference(context: Context): Double {
         val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
         return sharedPref.getFloat("latitude", 0.0f).toDouble()
@@ -22,11 +22,12 @@ object Preference{
 
     fun setLongitudeSharedPreference(lon: Double, context: Context) {
         val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
-        with(sharedPref.edit()){
+        with(sharedPref.edit()) {
             putFloat("longitude", lon.toFloat())
             apply()
         }
     }
+
     fun getLongitudeSharedPreference(context: Context): Double {
         val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
         return sharedPref.getFloat("longitude", 0.0f).toDouble()
@@ -34,15 +35,32 @@ object Preference{
 
     //location buttons state
 
-    fun setLocationStateSharedPreference( locationString : String ,context: Context) {
+    fun setLocationStateSharedPreference(locationString: String, context: Context) {
         val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
-        with(sharedPref.edit()){
+        with(sharedPref.edit()) {
             putString("location_state", locationString)
             apply()
         }
     }
+
     fun getLocationStateSharedPreference(context: Context): String? {
         val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
         return sharedPref.getString("location_state", " ")
     }
+}
+
+object UnitPreference {
+    fun setUnitSharedPreference(unitName: String, context: Context) {
+        val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("Unit", unitName)
+            apply()
+        }
+    }
+
+    fun getUnitSharedPreference(context: Context) : String? {
+        val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
+        return sharedPref.getString("Unit", " ")
+    }
+
 }

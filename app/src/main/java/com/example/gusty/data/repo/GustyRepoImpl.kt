@@ -17,19 +17,20 @@ class GustyRepoImpl private constructor(
 ) : GustyRepo {
     override suspend fun getCurrentWeather(
         latitude: Double,
-        longitude: Double
+        longitude: Double ,
+        unit : String
     ): Flow<CurrentWeatherDto> {
         return try {
-            weatherRemoteDataSource.getCurrentWeather(latitude, longitude)
+            weatherRemoteDataSource.getCurrentWeather(latitude, longitude , unit )
         } catch (e: Exception) {
             Log.i("TAG", "getCurrentWeather: repo  error ${e.message} ")
             flowOf()
         }
     }
 
-    override suspend fun getDailyAndHourlyWeather(latitude: Double, longitude: Double): Flow<HourlyAndDailyDto> {
+    override suspend fun getDailyAndHourlyWeather(latitude: Double, longitude: Double , unit: String): Flow<HourlyAndDailyDto> {
         return try {
-            weatherRemoteDataSource.getHourlyAndDailyWeather(latitude , longitude)
+            weatherRemoteDataSource.getHourlyAndDailyWeather(latitude , longitude , unit)
         } catch (e: Exception) {
             Log.i("TAG", "getDailyAndHourlyWeather repo : error ")
             flowOf()

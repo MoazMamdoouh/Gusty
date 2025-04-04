@@ -48,8 +48,8 @@ import com.example.gusty.R
 import com.example.gusty.home.model.CurrentWeatherModel
 import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
 import com.example.gusty.setting.Preference
+import com.example.gusty.setting.UnitPreference
 import com.example.gusty.ui.theme.nightColor
-import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.UiStateResult
 
 @Composable
@@ -62,11 +62,13 @@ fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double 
     val finalLat = if (lat == 0.0) Preference.getLatitudeSharedPreference(context) else lat
     val finalLon = if (lon == 0.0) Preference.getLongitudeSharedPreference(context) else lon
 
-
     LaunchedEffect(finalLat, finalLon) {
-        homeViewModel.getCurrentWeather(finalLat, finalLon)
-        homeViewModel.getHourlyWeather(finalLat,finalLon)
-        homeViewModel.getDailyWeather(finalLat,finalLon)
+        homeViewModel.getCurrentWeather(finalLat, finalLon ,
+            UnitPreference.getUnitSharedPreference(context) ?: "metric")
+        homeViewModel.getHourlyWeather(finalLat,finalLon ,
+            UnitPreference.getUnitSharedPreference(context) ?: "metric")
+        homeViewModel.getDailyWeather(finalLat,finalLon ,
+            UnitPreference.getUnitSharedPreference(context) ?: "metric")
     }
 
     when(currentWeatherViewModel){
