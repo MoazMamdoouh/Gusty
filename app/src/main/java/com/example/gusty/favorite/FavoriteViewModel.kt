@@ -8,7 +8,10 @@ import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.data.local.favorite.convertCurrentDtoToEntity
 import com.example.gusty.data.repo.GustyRepo
 import com.example.gusty.utilities.UiStateResult
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -23,6 +26,10 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
     private val _listOfFavorite: MutableStateFlow<UiStateResult<List<FavoriteEntity>>> =
         MutableStateFlow(UiStateResult.Loading)
     val listOfFavorite  = _listOfFavorite.asStateFlow()
+
+    private val _message: MutableSharedFlow<String> =
+        MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val message  = _message.asSharedFlow()
 
     fun getCurrentWeatherForFavorite(latitude: Double, longitude: Double , unit : String) {
         viewModelScope.launch {
@@ -46,6 +53,7 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
         viewModelScope.launch {
             try {
                 repo.insertItemToFavorite(favoriteEntity)
+                _message.emit("Insertion Success")
                 Log.i("TAG", "view model insertion success ")
             } catch (e: Exception) {
                 Log.i("TAG", "view model insertion error ${e.message} ")

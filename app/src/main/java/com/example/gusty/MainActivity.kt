@@ -35,8 +35,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.gusty.alarm.AlarmFactory
 import com.example.gusty.alarm.AlarmViewModel
 import com.example.gusty.data.local.FavoriteDataBase
-import com.example.gusty.data.local.GustyLocalDataSource
-import com.example.gusty.data.remote.GustyRemoteDataSource
+import com.example.gusty.data.local.GustyLocalDataSourceImpl
+import com.example.gusty.data.remote.GustyRemoteDataSourceImpl
 import com.example.gusty.data.remote.RetrofitService
 import com.example.gusty.data.repo.GustyRepoImpl
 import com.example.gusty.favorite.FavoriteFactory
@@ -59,8 +59,8 @@ class MainActivity : ComponentActivity() {
             val factory =
                 HomeFactory(
                     GustyRepoImpl.getInstance(
-                        GustyRemoteDataSource.getInstance(RetrofitService.api),
-                        GustyLocalDataSource.getInstance(
+                        GustyRemoteDataSourceImpl.getInstance(RetrofitService.api),
+                        GustyLocalDataSourceImpl.getInstance(
                             FavoriteDataBase.getInstance(this).getProductsDao(),
                             FavoriteDataBase.getInstance(this).getAlarmDao()
                         )
@@ -71,8 +71,8 @@ class MainActivity : ComponentActivity() {
             val favoriteFactory =
                 FavoriteFactory(
                     GustyRepoImpl.getInstance(
-                        GustyRemoteDataSource.getInstance(RetrofitService.api),
-                        GustyLocalDataSource.getInstance(
+                        GustyRemoteDataSourceImpl.getInstance(RetrofitService.api),
+                        GustyLocalDataSourceImpl.getInstance(
                             FavoriteDataBase.getInstance(this).getProductsDao(),
                             FavoriteDataBase.getInstance(this).getAlarmDao()
                         )
@@ -83,8 +83,8 @@ class MainActivity : ComponentActivity() {
             val alarmFactory =
                 AlarmFactory(
                     GustyRepoImpl.getInstance(
-                        GustyRemoteDataSource.getInstance(RetrofitService.api),
-                        GustyLocalDataSource.getInstance(
+                        GustyRemoteDataSourceImpl.getInstance(RetrofitService.api),
+                        GustyLocalDataSourceImpl.getInstance(
                             FavoriteDataBase.getInstance(this).getProductsDao(),
                             FavoriteDataBase.getInstance(this).getAlarmDao()
                         )
