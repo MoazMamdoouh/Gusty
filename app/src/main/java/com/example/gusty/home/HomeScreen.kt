@@ -49,6 +49,7 @@ import com.example.gusty.home.model.CurrentWeatherModel
 import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
 import com.example.gusty.setting.Preference
 import com.example.gusty.setting.UnitPreference
+import com.example.gusty.setting.WindPreference
 import com.example.gusty.ui.theme.nightColor
 import com.example.gusty.utilities.UiStateResult
 
@@ -286,6 +287,7 @@ fun DailyAndHourlyWeatherCard(
 }
 @Composable
 fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .width(200.dp)
@@ -330,7 +332,8 @@ fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = " ${currentWeatherViewModel.wind.speed} km/h",
+                    text = " ${currentWeatherViewModel.wind.speed} " +
+                    WindPreference.getWindSharedPreference(context),
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold

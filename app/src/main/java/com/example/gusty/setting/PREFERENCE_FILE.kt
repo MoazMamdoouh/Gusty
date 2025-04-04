@@ -58,9 +58,22 @@ object UnitPreference {
         }
     }
 
-    fun getUnitSharedPreference(context: Context) : String? {
+    fun getUnitSharedPreference(context: Context): String? {
         val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
         return sharedPref.getString("Unit", " ")
     }
+}
 
+object WindPreference {
+    fun setWindSharedPreference(unitName: String, context: Context) {
+        val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("Wind_Unit", unitName)
+            apply()
+        }
+    }
+    fun getWindSharedPreference(context: Context) : String? {
+        val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
+        return sharedPref.getString("Wind_Unit", " ")
+    }
 }

@@ -4,5 +4,9 @@ enum class UnitEnum {
     CELSIUS ,
     KELVIN,
     FAHRENHEIT
+}
 
+enum class WindUnitEnum {
+    MS,
+    MPH
 }

@@ -1,6 +1,7 @@
 package com.example.gusty.setting
 
-import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,10 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.gusty.R
 import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.dark_blue
 import com.example.gusty.utilities.LocationPermission
@@ -250,7 +253,7 @@ fun LocationCard(navController: NavHostController) {
 fun UnitCard() {
     //celsius and fahrenheit and kelvin
     val context = LocalContext.current
-    val initUnit = when(UnitPreference.getUnitSharedPreference(context)){
+    val initUnit = when (UnitPreference.getUnitSharedPreference(context)) {
         "metric" -> UnitEnum.CELSIUS
         "imperial" -> UnitEnum.FAHRENHEIT
         "standard" -> UnitEnum.KELVIN
@@ -277,6 +280,7 @@ fun UnitCard() {
             FilterChip(
                 onClick = {
                     UnitPreference.setUnitSharedPreference("metric", context)
+                    WindPreference.setWindSharedPreference("m/s" , context)
                     selectedUnit = UnitEnum.CELSIUS
                 },
                 label = {
@@ -299,6 +303,7 @@ fun UnitCard() {
             FilterChip(
                 onClick = {
                     UnitPreference.setUnitSharedPreference("imperial", context)
+                    WindPreference.setWindSharedPreference("mph" , context)
                     selectedUnit = UnitEnum.FAHRENHEIT
                 },
                 label = {
@@ -320,7 +325,8 @@ fun UnitCard() {
             Spacer(Modifier.width(9.dp))
             FilterChip(
                 onClick = {
-                    UnitPreference.setUnitSharedPreference("standard" , context)
+                    UnitPreference.setUnitSharedPreference("standard", context)
+                    WindPreference.setWindSharedPreference("m/s" , context)
                     selectedUnit = UnitEnum.KELVIN
                 },
                 label = {
@@ -347,4 +353,77 @@ fun UnitCard() {
 @Composable
 fun WindSettingsCard() {
 
+    val context = LocalContext.current
+    val initUnit = when (WindPreference.getWindSharedPreference(context)) {
+        "m/s" -> WindUnitEnum.MS
+        "mph" -> WindUnitEnum.MPH
+        else -> WindUnitEnum.MS
+    }
+    var selectedWindDegree by remember { mutableStateOf<WindUnitEnum>(initUnit) }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp), shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF4E4F4F).copy(alpha = 0.2f)) // Light Blue Transparent
+    ) {
+        Row {
+            Image(painter = painterResource(R.drawable.wind_icon) , contentDescription = null
+            ,Modifier.size(width = 50.dp , height = 50.dp)
+                    .padding(start = 10.dp , top = 10.dp))
+            Spacer(Modifier.width(5.dp))
+            Text(
+                context.getString(R.string.wind),
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.padding(10.dp)
+            )
+        }
+        Spacer(Modifier.height(5.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth()
+            , horizontalArrangement = Arrangement.Center
+        ) {
+            Spacer(Modifier.width(9.dp))
+            FilterChip(
+                onClick = {},
+                enabled = false,
+                label = {
+                    Text("M/S")
+                },
+                selected = selectedWindDegree == WindUnitEnum.MS,
+                leadingIcon = if (selectedWindDegree == WindUnitEnum.MS) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else {
+                    null
+                },
+            )
+            Spacer(Modifier.width(9.dp))
+            FilterChip(
+                onClick = {},
+                enabled = false,
+                label = {
+                    Text("MPH")
+                },
+                selected = selectedWindDegree == WindUnitEnum.MPH,
+                leadingIcon = if (selectedWindDegree == WindUnitEnum.MPH) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else {
+                    null
+                },
+            )
+        }
+    }
 }
