@@ -128,6 +128,7 @@ class MainActivity : ComponentActivity() {
                                         0 -> navController.navigate(Routes.HOME.toString())
                                         1 -> navController.navigate(Routes.FAVORITE.toString())
                                         2 -> navController.navigate(Routes.ALARM.toString())
+                                        3 -> navController.navigate(Routes.SETTINGS.toString())
                                     }
                                 },
                                 icon = {
@@ -149,7 +150,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth()
                         .padding(innerPadding), contentAlignment = Alignment.Center
                 ) {
-                    MyNavGraph(navController, homeViewModel, favoriteViewModel , alarmViewModel)
+                    MyNavGraph(navController, homeViewModel, favoriteViewModel , alarmViewModel ,)
                 }
             }
 

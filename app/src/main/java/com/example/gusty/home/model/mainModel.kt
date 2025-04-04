@@ -12,10 +12,10 @@ data class MainModel(
     companion object {
         fun fromDto(main: Main): MainModel {
             return MainModel(
-                temperature = (main.temp - 273.15).toInt(),
-                feelsLike = (main.feels_like - 273.15).toInt(),
-                minimumTemperature = (main.temp_min - 273.15).toInt(),
-                maximumTemperature =(main.temp_max - 273.15).toInt() ,
+                temperature = main.temp.toInt() ,
+                feelsLike = main.feels_like.toInt(),
+                minimumTemperature = main.temp_min.toInt(),
+                maximumTemperature =main.temp_max.toInt() ,
                 pressure = main.pressure
             )
         }

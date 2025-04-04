@@ -39,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ import com.example.gusty.R
 import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.home.HomeScreen
 import com.example.gusty.home.HomeViewModel
+import com.example.gusty.setting.UnitPreference
 import com.example.gusty.ui.theme.gray
 import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.UiStateResult
@@ -232,6 +234,7 @@ fun OpenAddToFavoriteDialog(
 ) {
     var loadingSate by remember { mutableStateOf(false) }
     var isRequested by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val favoriteCurrentWeatherObject =
         favoriteViewModel.currentWeather.collectAsStateWithLifecycle().value
 
@@ -266,26 +269,28 @@ fun OpenAddToFavoriteDialog(
                 clickedLocation?.let {
                     favoriteViewModel.getCurrentWeatherForFavorite(
                         it.latitude,
-                        clickedLocation.longitude
+                        clickedLocation.longitude ,
+                        UnitPreference.getUnitSharedPreference(context) ?: "metric"
                     )
                 }
             }) {
                 Text(
                     if (isRequested) "Loading..." else "Add to Favorite",
-                    fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = Color.Green
                 )
             }
-        },
+        }
+        ,
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel" , color = Color.Black)
             }
         },
         title = {
-            Text(text = "Add to favorite" , color = Color.Green )
-        },
+            Text(text = "Add to favorite" , color = Color.Black , fontSize = 32.sp )
+        }
+            ,
         text = {
             Text("Do u want to add this Place to Favorite Places" ,
                 fontSize = 20.sp,

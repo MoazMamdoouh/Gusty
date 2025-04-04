@@ -33,11 +33,11 @@ class AlarmViewModel(private val repo: GustyRepo) : ViewModel() {
     val listOfAlarms = _listOfAlarms.asStateFlow()
 
 
-    fun getCurrentWeather(latitude: Double, longitude: Double) {
+    fun getCurrentWeather(latitude: Double, longitude: Double , unit : String ) {
         Log.i("TAG", "in getCurrentWeather view model  ")
         viewModelScope.launch {
             try {
-                    repo.getCurrentWeather(latitude, longitude)
+                    repo.getCurrentWeather(latitude, longitude , unit)
                     .catch { _currentWeather.emit(UiStateResult.Failure(Throwable())) }
                     .collect {
                         Log.i("TAG", "view model ui state should be success")

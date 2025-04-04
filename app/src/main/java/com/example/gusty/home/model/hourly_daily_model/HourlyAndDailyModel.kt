@@ -26,7 +26,7 @@ fun HourlyAndDailyDto.hourlyModel(): List<HourlyAndDailyModel> {
         val backGround = getBackGroundColor(timeInInt)
         val newIcon = convertIcon(it.weather.firstOrNull()?.icon)
         HourlyAndDailyModel(
-            temperature = (it.main.temp - 273.15).toInt(),
+            temperature = it.main.temp.toInt(),
             time = timeInString,
             icon = newIcon,
             backGroundColor = backGround
@@ -44,7 +44,7 @@ fun HourlyAndDailyDto.mapDailyDtoToModel() : List<HourlyAndDailyModel>{
         val backGround = getBackGroundColor(timeInInt)
         val newIcon = convertIcon(it.weather.firstOrNull()?.icon)
         HourlyAndDailyModel(
-            temperature = (it.main.temp - 273.15).toInt(),
+            temperature = it.main.temp.toInt(),
             time = timeInString,
             icon = newIcon,
             backGroundColor = backGround

@@ -24,3 +24,5 @@ val light_orange = Color(0xFFE1BD7B)
 val red = Color(0xFFEE5656)
 val second_red = Color(0xFFA65151)
 
+val dark_baby_blue = Color(0xFF065067)
+val baby_blue = Color(0xFF12A7D5)

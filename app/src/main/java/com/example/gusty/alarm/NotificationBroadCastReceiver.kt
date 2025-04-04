@@ -22,6 +22,7 @@ import com.example.gusty.data.remote.GustyRemoteDataSource
 import com.example.gusty.data.remote.RetrofitService
 import com.example.gusty.data.repo.GustyRepoImpl
 import com.example.gusty.home.model.mapDtoToModel
+import com.example.gusty.setting.UnitPreference
 import com.example.gusty.utilities.LocationPermission
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -44,7 +45,7 @@ class NotificationBroadCastReceiver : BroadcastReceiver() {
                     )
                 )
                 repo.getCurrentWeather(LocationPermission.locationState.value.latitude ,
-                    LocationPermission.locationState.value.longitude)
+                    LocationPermission.locationState.value.longitude , UnitPreference.getUnitSharedPreference(context) ?: "metric")
                     .map { dto -> dto.mapDtoToModel() }
                     .first()
             }
