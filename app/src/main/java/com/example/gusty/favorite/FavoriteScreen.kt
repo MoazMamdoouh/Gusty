@@ -272,20 +272,21 @@ fun OpenAddToFavoriteDialog(
             }) {
                 Text(
                     if (isRequested) "Loading..." else "Add to Favorite",
-                    fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = Color.Green
                 )
             }
-        },
+        }
+        ,
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel" , color = Color.Black)
             }
         },
         title = {
-            Text(text = "Add to favorite" , color = Color.Green )
-        },
+            Text(text = "Add to favorite" , color = Color.Black , fontSize = 32.sp )
+        }
+            ,
         text = {
             Text("Do u want to add this Place to Favorite Places" ,
                 fontSize = 20.sp,

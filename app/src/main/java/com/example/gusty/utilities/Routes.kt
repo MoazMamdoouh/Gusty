@@ -6,5 +6,6 @@ enum class Routes {
     HOME ,
     FAVORITE ,
     ALARM ,
-    SETTINGS
+    SETTINGS ,
+    SETTINGS_MAP
 }

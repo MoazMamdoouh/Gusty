@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Gusty</string>
+    <string name="c">C</string>
+    <string name="feels_like">Feels Like</string>
+    <string name="hourly">Hourly</string>
+    <string name="daily">Daily</string>
+    <string name="wind">Wind</string>
+    <string name="speed">"Speed : "</string>
+    <string name="o">o</string>
+    <string name="rain">Rain</string>
+    <string name="last_hour">"Last Hour : "</string>
+    <string name="clouds">Clouds</string>
+    <string name="pressure">Pressure</string>
+    <string name="pressure_">"Pressure : "</string>
 </resources>
