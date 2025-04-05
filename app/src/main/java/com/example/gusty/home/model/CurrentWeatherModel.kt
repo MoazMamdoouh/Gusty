@@ -1,5 +1,6 @@
 package com.example.gusty.home.model
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.example.gusty.data.model.curren_weather_dto.Clouds
 import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
@@ -32,12 +33,14 @@ data class CurrentWeatherModel(
     val wind: Wind,
     val rain: Rain?,
     val clouds: Clouds,
-    val backgroundColor: Color ,
-    val secondBackGroundColor : Color
+    val backgroundColor: Color,
+    val secondBackGroundColor: Color
 )
 
 fun CurrentWeatherDto.mapDtoToModel(): CurrentWeatherModel {
-    val timeInHour = convertUnixToHour(dt)
+    val adjustedDt = dt + timezone
+    val countryName = getCountryNameFromCode(sys.country)
+    val timeInHour = convertUnixToHour(adjustedDt.toInt())
     val timeAsInt = convertHourToInt(timeInHour)
     val backgroundColor = getBackGroundColor(timeAsInt)
     val secondBackGroundColor = getSecondBackGroundColor(backgroundColor)
@@ -46,14 +49,14 @@ fun CurrentWeatherDto.mapDtoToModel(): CurrentWeatherModel {
         lon = coord.lon,
         weather = weather,
         main = MainModel.fromDto(main),
-        countryName = sys.country,
-        time = dt,
+        countryName = countryName,
+        time = dt.toInt(),
         id = id,
         cityName = name,
         wind = wind,
         rain = rain,
         clouds = clouds,
-        backgroundColor = backgroundColor ,
+        backgroundColor = backgroundColor,
         secondBackGroundColor = secondBackGroundColor
     )
 }
@@ -73,6 +76,7 @@ fun convertHourToInt(time: String): Int {
 }
 
 fun getBackGroundColor(time: Int): Color {
+
     return when (time) {
         in 6..13 -> blue
         in 14..17 -> orange
@@ -82,12 +86,17 @@ fun getBackGroundColor(time: Int): Color {
     }
 }
 
-fun getSecondBackGroundColor(color: Color) : Color{
-    return when(color){
-         blue -> dark_blue
+fun getSecondBackGroundColor(color: Color): Color {
+    return when (color) {
+        blue -> dark_blue
         orange -> light_orange
         red -> second_red
         nightColor -> whiteNightColor
         else -> Color.Black
     }
+}
+
+fun getCountryNameFromCode(countryCode: String): String {
+    val locale = Locale("", countryCode)
+    return locale.displayCountry
 }

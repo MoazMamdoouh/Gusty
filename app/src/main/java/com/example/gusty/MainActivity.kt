@@ -164,7 +164,6 @@ class MainActivity : ComponentActivity() {
         if (LocationPermission.CheckPermission(this)) {
             if (LocationPermission.isLocationEnabled(this)) {
                 LocationPermission.getUpToDateLocation(fusedLocationProvider, context = this)
-                Log.i("TAG", "onStart: location gotted")
             } else {
                 // enableLocationService()
             }

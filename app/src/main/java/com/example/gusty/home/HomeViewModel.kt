@@ -31,6 +31,7 @@ class HomeViewModel(val repo: GustyRepo) : ViewModel() {
     // hourly weather
     private val _hourlyWeather = MutableLiveData<List<HourlyAndDailyModel>>()
     val hourlyWeather = _hourlyWeather
+
     // daily weather
     private val _dailyWeather = MutableLiveData<List<HourlyAndDailyModel>>()
     val dailyWeather = _dailyWeather

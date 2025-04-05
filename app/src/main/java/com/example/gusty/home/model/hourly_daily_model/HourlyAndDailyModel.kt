@@ -1,5 +1,6 @@
 package com.example.gusty.home.model.hourly_daily_model
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.example.gusty.R
 import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto
@@ -14,31 +15,43 @@ data class HourlyAndDailyModel(
     val temperature: Int,
     val time: String,
     val icon: Int,
-    val backGroundColor: Color
+    val backGroundColor: Color ,
+    val day : String
 )
 
 fun HourlyAndDailyDto.hourlyModel(): List<HourlyAndDailyModel> {
-    return list.filter {
-        convertUnixToDate(it.dt) == getCurrentDay()
-    }.map {
-        val timeInString = convertUnixToHour(it.dt)
+    val timeZone = city.timezone
+    val groupedForecast = list.groupBy { it.dt_txt?.substring(0, 10) }
+    val todayKey = groupedForecast.keys.firstOrNull()
+    val todayForecast = groupedForecast[todayKey] ?: emptyList()
+    val upcomingDays = groupedForecast.filterKeys { it != todayKey }
+    val currentDay = getCurrentDay(timeZone)
+
+    return todayForecast.map {
+        val adjustTimeStamp = it.dt + timeZone
+        val hour = getHourFromAdjustedDt(adjustTimeStamp)
+        val timeInString = convertUnixToHour(adjustTimeStamp)
         val timeInInt = convertHourToInt(timeInString)
-        val backGround = getBackGroundColor(timeInInt)
+        val backGround = getBackGroundColor(hour)
         val newIcon = convertIcon(it.weather.firstOrNull()?.icon)
         HourlyAndDailyModel(
-            temperature = it.main.temp.toInt(),
+            temperature = it.main.temp.toInt() ,
             time = timeInString,
             icon = newIcon,
-            backGroundColor = backGround
+            backGroundColor = backGround ,
+            day = ""
         )
     }
+
 }
 
 fun HourlyAndDailyDto.mapDailyDtoToModel() : List<HourlyAndDailyModel>{
+
     return list.filter {
         val formattedTime = convertUnixToHour(it.dt)
         formattedTime.equals("11 AM", ignoreCase = true)
     }.map {
+        val day = convertUnixToDayOfWeek(dt = it.dt)
         val timeInString = convertUnixToHour(it.dt)
         val timeInInt = convertHourToInt(timeInString)
         val backGround = getBackGroundColor(timeInInt)
@@ -47,25 +60,30 @@ fun HourlyAndDailyDto.mapDailyDtoToModel() : List<HourlyAndDailyModel>{
             temperature = it.main.temp.toInt(),
             time = timeInString,
             icon = newIcon,
-            backGroundColor = backGround
+            backGroundColor = backGround ,
+            day = day
         )
     }
 }
 
-fun getCurrentDay(): String {
-    val time = Calendar.getInstance().time
-    val formatter = SimpleDateFormat("yyyy-MM-dd")
-    val current = formatter.format(time)
-    return current
+fun getCurrentDay(timeZone: Int): String {
+    val currentUtc = System.currentTimeMillis() / 1000
+    val adjustedTime = currentUtc + timeZone
+    return convertUnixToDate(adjustedTime)
+}
+private fun getHourFromAdjustedDt(adjustedDt: Long): Int {
+    val date = Date(adjustedDt * 1000L)
+    val calendar = Calendar.getInstance().apply { time = date }
+    return calendar.get(Calendar.HOUR_OF_DAY)
 }
 
-fun convertUnixToDate(dt: Int): String {
+fun convertUnixToDate(dt: Long): String {
     val date = Date(dt * 1000L)
     val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     return format.format(date)
 }
 
-fun convertUnixToHour(dt: Int): String {
+fun convertUnixToHour(dt: Long): String {
     val date = Date(dt * 1000L)
     val format = SimpleDateFormat("h a", Locale.getDefault())
     return format.format(date)
@@ -77,21 +95,22 @@ fun convertIcon(icon: String?): Int {
         "01n" -> R.drawable.clear_sky_night
         "02d" -> R.drawable.few_clouds_morning
         "02n" -> R.drawable.few_cloudy_night
-        "03d" -> R.drawable.cloudy_icon
-        "03n" -> R.drawable.cloudy_icon
-        "04d" -> R.drawable.cloudy_icon
-        "04n" -> R.drawable.cloudy_icon
-        "09d" -> R.drawable.rain_icon
-        "09n" -> R.drawable.rain_icon
-        "010d" -> R.drawable.rain_icon
-        "010n" -> R.drawable.rain_icon
+        "03d" -> R.drawable.cloudy_sky_new
+        "03n" -> R.drawable.cloudy_sky_new
+        "04d" -> R.drawable.cloudy_sky_new
+        "04n" -> R.drawable.cloudy_sky_new
+        "09d" -> R.drawable.rain_new
+        "09n" -> R.drawable.rain_new
+        "010d" -> R.drawable.rain_new
+        "010n" -> R.drawable.rain_new
         "11d" -> R.drawable.rain_with_thunder
         "11n" -> R.drawable.rain_with_thunder
         "13d" -> R.drawable.snow_sky
         "13n" -> R.drawable.snow_sky
-        else -> R.drawable.wind_icon
+        else -> R.drawable.windy_new
     }
 }
+
 
 
 fun convertHourToInt(time: String): Int {
@@ -110,4 +129,10 @@ fun getBackGroundColor(time: Int): Color {
         in 20..23, in 0..5 -> nightColor
         else -> Color.Black
     }
+}
+
+fun convertUnixToDayOfWeek(dt: Long): String {
+    val date = Date(dt * 1000L)
+    val format = SimpleDateFormat("EEEE", Locale.getDefault())
+    return format.format(date)
 }

@@ -22,14 +22,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -50,7 +53,6 @@ import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
 import com.example.gusty.setting.Preference
 import com.example.gusty.setting.UnitPreference
 import com.example.gusty.setting.WindPreference
-import com.example.gusty.ui.theme.nightColor
 import com.example.gusty.utilities.UiStateResult
 
 @Composable
@@ -62,6 +64,16 @@ fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double 
     val context = LocalContext.current
     val finalLat = if (lat == 0.0) Preference.getLatitudeSharedPreference(context) else lat
     val finalLon = if (lon == 0.0) Preference.getLongitudeSharedPreference(context) else lon
+
+    var background by remember { mutableStateOf(Color.White) }
+    var secondBackground by remember { mutableStateOf(Color.White) }
+
+    LaunchedEffect(currentWeatherViewModel) {
+        if (currentWeatherViewModel is UiStateResult.Success) {
+            background = currentWeatherViewModel.response.backgroundColor
+            secondBackground = currentWeatherViewModel.response.secondBackGroundColor
+        }
+    }
 
     LaunchedEffect(finalLat, finalLon) {
         homeViewModel.getCurrentWeather(finalLat, finalLon ,
@@ -82,8 +94,8 @@ fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double 
                     .background(
                         brush = Brush.verticalGradient(
                             listOf(
-                                currentWeatherViewModel.response.backgroundColor,
-                                currentWeatherViewModel.response.secondBackGroundColor
+                                background,
+                                secondBackground
                             )
                         )
                     )
@@ -92,7 +104,7 @@ fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double 
                 Spacer(Modifier.height(10.dp))
                 DailyWeatherInfoCard(currentWeatherViewModel.response)
                 Spacer(Modifier.height(10.dp))
-                DailyAndHourlyWeatherCard(hourlyWeatherViewModel , dailyWeatherViewModel)
+                DailyAndHourlyWeatherCard(hourlyWeatherViewModel , dailyWeatherViewModel , currentWeatherViewModel.response.backgroundColor)
                 Spacer(Modifier.height(10.dp))
                 Row {
                     WindCard(currentWeatherViewModel.response)
@@ -223,7 +235,8 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: CurrentWeatherModel ) {
 @Composable
 fun DailyAndHourlyWeatherCard(
     hourlyWeatheViewModel: State<List<HourlyAndDailyModel>?>,
-    dailyWeatherViewModel: State<List<HourlyAndDailyModel>?>
+    dailyWeatherViewModel: State<List<HourlyAndDailyModel>?>,
+    backgroundColor: Color
 ) {
     val context = LocalContext.current
     val selectOption = remember { mutableStateOf(context.getString(R.string.hourly)) }
@@ -254,7 +267,7 @@ fun DailyAndHourlyWeatherCard(
                         .weight(1f)
                         .padding(5.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectOption.value == context.getString(R.string.hourly)) Color.Blue else Color.Gray,
+                        containerColor = if (selectOption.value == context.getString(R.string.hourly)) Color.Black else backgroundColor,
                         contentColor = Color.White
                     )
                 ) {
@@ -270,8 +283,8 @@ fun DailyAndHourlyWeatherCard(
                         .weight(1f)
                         .padding(5.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectOption.value == context.getString(R.string.daily)) Color.Black else nightColor,
-                        contentColor = Color.White // Text color
+                        containerColor = if (selectOption.value == context.getString(R.string.daily)) Color.Black else backgroundColor,
+                        contentColor = Color.White
                     )
                 ) {
                     Text(
@@ -632,37 +645,29 @@ fun DailyWeatherItem(daily: HourlyAndDailyModel) {
         modifier = Modifier
             .padding(start = 3.dp, end = 3.dp)
     ) {
-        Card(
+        Column (
             modifier = Modifier
                 .size(width = 140.dp, height = 200.dp)
                 .padding(start = 20.dp, end = 20.dp, top = 15.dp)
-                .shadow(
-                    elevation = 25.dp,
-                    ambientColor = Color.Black,
-                    spotColor = Color.Cyan,
-                    shape = RoundedCornerShape(20.dp)
-                ),
-            shape = RoundedCornerShape(20.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        daily.backGroundColor
-                    )
+                    , verticalArrangement = Arrangement.Center ,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Text(text = daily.day , fontSize = 18.sp , fontWeight = FontWeight.Bold , color = Color.Black)
                 Image(
                     painter = painterResource(daily.icon)
                     , contentDescription = "weather_icon"
                     , modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
+                        .width(60.dp)
+                        .height(60.dp)
                         .padding(top = 5.dp)
                 )
                 Text(
                     text = stringResource(R.string.c),
-                    color = Color.White,
+                    color = Color.Black,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -671,7 +676,7 @@ fun DailyWeatherItem(daily: HourlyAndDailyModel) {
                 )
                 Text(
                     "${daily.temperature}",
-                    color = Color.White,
+                    color = Color.Black,
                     fontSize = 40.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -680,4 +685,3 @@ fun DailyWeatherItem(daily: HourlyAndDailyModel) {
         }
     }
 }
-

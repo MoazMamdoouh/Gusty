@@ -2,7 +2,7 @@ package com.example.gusty.data.model.hourly_daily_dto
 
 data class Item0(
     val clouds: Clouds,
-    val dt: Int,
+    val dt: Long,
     val dt_txt: String,
     val main: Main,
     val pop: Double,

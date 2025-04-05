@@ -34,13 +34,11 @@ class AlarmViewModel(private val repo: GustyRepo) : ViewModel() {
 
 
     fun getCurrentWeather(latitude: Double, longitude: Double , unit : String ) {
-        Log.i("TAG", "in getCurrentWeather view model  ")
         viewModelScope.launch {
             try {
                     repo.getCurrentWeather(latitude, longitude , unit)
                     .catch { _currentWeather.emit(UiStateResult.Failure(Throwable())) }
                     .collect {
-                        Log.i("TAG", "view model ui state should be success")
                         _currentWeather.emit(UiStateResult.Success(it))
                     }
             } catch (e: Exception) {
@@ -58,7 +56,6 @@ class AlarmViewModel(private val repo: GustyRepo) : ViewModel() {
         duration: Long
     ) {
         viewModelScope.launch {
-            Log.i("TAG", "in insertAlarm in view model  ")
             val androidAlarmManager = AndroidAlarmManager(context)
             val alarmEntity = AlarmEntity(
                 id,
@@ -68,7 +65,6 @@ class AlarmViewModel(private val repo: GustyRepo) : ViewModel() {
             )
             try {
                     repo.insertAlarmToDataBase(alarmEntity)
-                    Log.i("TAG", "view model insertAlarm insertion success ")
                     androidAlarmManager.scheduler(alarmEntity.id, duration)
             } catch (e: Exception) {
                 Log.i("TAG", "insertAlarm view model error : ${e.message} ")
@@ -90,10 +86,6 @@ class AlarmViewModel(private val repo: GustyRepo) : ViewModel() {
 
     private fun getDuration(min: Int, hour: Int, day: Int, month: Int, year: Int): Long {
         val localDateTime = LocalDateTime.of(year, month, day, hour, min)
-       // val futureTime = localDateTime
-       // val currentTime = LocalDateTime.now()
-       // val duration = Duration.between(currentTime, futureTime)
-       // Log.i("TAG", "duration in millis $duration ")
         return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
     }

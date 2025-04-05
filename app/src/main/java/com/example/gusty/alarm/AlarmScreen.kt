@@ -260,6 +260,7 @@ fun OpenButtonSheet(
                                 hour = timePickerState.hour,
                                 stamp = timeStamp
                             )
+                            // androidManager(context)
                             alarmViewModel.insertAlarm(
                                 context,
                                 id = duration.toInt() / 1000,

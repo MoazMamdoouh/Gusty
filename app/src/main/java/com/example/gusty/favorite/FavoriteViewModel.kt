@@ -40,7 +40,6 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
                         _currentWeather.emit(UiStateResult.Failure(throwable))
                     }
                     .collect { entity ->
-                        Log.i("TAG", "view model getCurrentWeatherForFavorite success ")
                         _currentWeather.emit(UiStateResult.Success(entity))
                     }
             } catch (e: Exception) {
@@ -54,7 +53,6 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
             try {
                 repo.insertItemToFavorite(favoriteEntity)
                 _message.emit("Insertion Success")
-                Log.i("TAG", "view model insertion success ")
             } catch (e: Exception) {
                 Log.i("TAG", "view model insertion error ${e.message} ")
             }
