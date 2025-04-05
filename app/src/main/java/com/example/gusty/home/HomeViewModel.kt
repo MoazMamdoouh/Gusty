@@ -35,10 +35,10 @@ class HomeViewModel(val repo: GustyRepo) : ViewModel() {
     // daily weather
     private val _dailyWeather = MutableLiveData<List<HourlyAndDailyModel>>()
     val dailyWeather = _dailyWeather
-    fun getCurrentWeather(latitude: Double, longitude: Double , unit : String) {
+    fun getCurrentWeather(latitude: Double, longitude: Double , unit : String , lang : String ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val current = repo.getCurrentWeather(latitude , longitude , unit)
+                val current = repo.getCurrentWeather(latitude , longitude , unit , lang)
                     .map { dto -> dto.mapDtoToModel() }
                     .catch {
                         Log.i("TAG", "home view model failure ${Throwable().message}  ")

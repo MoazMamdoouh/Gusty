@@ -20,10 +20,11 @@ class GustyRepoImpl private constructor(
     override suspend fun getCurrentWeather(
         latitude: Double,
         longitude: Double ,
-        unit : String
+        unit : String ,
+        lang : String
     ): Flow<CurrentWeatherDto> {
         return try {
-            weatherRemoteDataSource.getCurrentWeather(latitude, longitude , unit )
+            weatherRemoteDataSource.getCurrentWeather(latitude, longitude , unit , lang )
         } catch (e: Exception) {
             Log.i("TAG", "getCurrentWeather: repo  error ${e.message} ")
             flowOf()

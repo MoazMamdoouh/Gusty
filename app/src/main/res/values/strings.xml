@@ -45,4 +45,8 @@
     <string name="favorite">Favorite</string>
     <string name="notification">Notification</string>
     <string name="sittings">Sittings</string>
+    <string name="deg">"deg : "</string>
+    <string name="gust">"gust  : "</string>
+    <string name="km_h">km/h</string>
+    <string name="hpa">hPa</string>
 </resources>

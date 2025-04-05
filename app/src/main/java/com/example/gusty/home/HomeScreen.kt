@@ -78,7 +78,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, lat: Double = 0.0, lon: Double = 0.
     LaunchedEffect(finalLat, finalLon) {
         homeViewModel.getCurrentWeather(
             finalLat, finalLon,
-            UnitPreference.getUnitSharedPreference(context) ?: "metric"
+            UnitPreference.getUnitSharedPreference(context) ?: "metric" ,
+            LanguagePreference.getLanguagePref(context) ?: "en"
         )
         homeViewModel.getHourlyWeather(
             finalLat, finalLon,
@@ -404,7 +405,7 @@ fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
                     .padding(start = 5.dp)
             ) {
                 Text(
-                    text = "deg : ",
+                    text = stringResource(R.string.deg),
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -429,13 +430,13 @@ fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
                     .padding(start = 5.dp)
             ) {
                 Text(
-                    text = "gust  : ",
+                    text = stringResource(R.string.gust),
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = " ${currentWeatherViewModel.wind.gust} m/s",
+                    text = " ${currentWeatherViewModel.wind.gust}  ${stringResource(R.string.m_s)}",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -493,7 +494,8 @@ fun RainCard(currentWeatherViewModel: CurrentWeatherModel) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = " ${currentWeatherViewModel.rain} km/h",
+
+                    text = " ${currentWeatherViewModel.rain} ${stringResource(R.string.km_h)} ",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -609,7 +611,8 @@ fun PressureCard(currentWeatherViewModel: CurrentWeatherModel) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = " ${currentWeatherViewModel.main.pressure} hPa",
+
+                    text = " ${currentWeatherViewModel.main.pressure} ${stringResource(R.string.hpa)} ",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold

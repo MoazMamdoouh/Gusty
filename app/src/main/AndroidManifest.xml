@@ -38,6 +38,8 @@
 
         <receiver android:name=".alarm.OnActionBroadCast"
             android:exported="true" />
+        <receiver android:name=".utilities.NetworkConnectionBroadCast"
+            android:exported="true"/>
     </application>
 
 </manifest>

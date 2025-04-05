@@ -13,7 +13,8 @@ interface Api {
         @Query("lat") lat: Double ,
         @Query("lon") lon: Double ,
         @Query("appid") apiKey: String = "b753d8e898af2c2c8235d35152cf5139",
-        @Query("units") unit : String
+        @Query("units") unit : String ,
+        @Query("lang") lang : String
     ) : CurrentWeatherDto
 
     @GET("forecast")

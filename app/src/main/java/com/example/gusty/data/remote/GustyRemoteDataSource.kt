@@ -7,6 +7,6 @@ import kotlinx.coroutines.flow.flowOf
 
 interface GustyRemoteDataSource {
 
-    suspend fun getCurrentWeather(latitude: Double, longitude: Double , unit : String): Flow<CurrentWeatherDto>
+    suspend fun getCurrentWeather(latitude: Double, longitude: Double , unit : String , lang : String): Flow<CurrentWeatherDto>
     suspend fun getHourlyAndDailyWeather(lat : Double , lon : Double , unit: String) : Flow<HourlyAndDailyDto>
 }

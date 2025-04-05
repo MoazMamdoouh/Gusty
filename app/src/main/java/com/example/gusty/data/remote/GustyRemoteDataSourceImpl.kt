@@ -10,10 +10,11 @@ class GustyRemoteDataSourceImpl private constructor(private val api: Api) : Gust
     override suspend fun getCurrentWeather(
         latitude: Double,
         longitude: Double,
-        unit: String
+        unit: String ,
+        lang : String
     ): Flow<CurrentWeatherDto> {
         return try {
-            val response = api.getDailyWeatherInfo(latitude, longitude, unit = unit)
+            val response = api.getDailyWeatherInfo(latitude, longitude, unit = unit , lang = lang)
             flowOf(response)
         } catch (e: Exception) {
             flowOf()

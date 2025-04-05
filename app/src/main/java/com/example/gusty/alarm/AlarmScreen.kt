@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gusty.R
 import com.example.gusty.data.local.alarm.AlarmEntity
+import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.setting.UnitPreference
 import com.example.gusty.ui.theme.gray
 import com.example.gusty.ui.theme.transparentBlack
@@ -295,7 +296,8 @@ fun OpenButtonSheet(
                     alarmViewModel.getCurrentWeather(
                         LocationPermission.locationState.value.latitude,
                         LocationPermission.locationState.value.longitude,
-                        UnitPreference.getUnitSharedPreference(context) ?: "metric"
+                        UnitPreference.getUnitSharedPreference(context) ?: "metric" ,
+                        LanguagePreference.getLanguagePref(context) ?: "en"
                     )
                     when (currentWeather) {
                         is UiStateResult.Loading -> {

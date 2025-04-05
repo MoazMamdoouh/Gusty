@@ -31,10 +31,10 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
         MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val message  = _message.asSharedFlow()
 
-    fun getCurrentWeatherForFavorite(latitude: Double, longitude: Double , unit : String) {
+    fun getCurrentWeatherForFavorite(latitude: Double, longitude: Double , unit : String , lang : String ) {
         viewModelScope.launch {
             try {
-                repo.getCurrentWeather(latitude, longitude , unit )
+                repo.getCurrentWeather(latitude, longitude , unit , lang )
                     .map { dto -> dto.convertCurrentDtoToEntity() }
                     .catch { throwable ->
                         _currentWeather.emit(UiStateResult.Failure(throwable))

@@ -7,6 +7,7 @@ import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto
 import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.nightColor
+import com.example.gusty.ui.theme.orange
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -16,8 +17,8 @@ data class HourlyAndDailyModel(
     val temperature: Int,
     val time: String,
     val icon: Int,
-    val backGroundColor: Color ,
-    val day : String
+    val backGroundColor: Color,
+    val day: String
 )
 
 fun HourlyAndDailyDto.hourlyModel(): List<HourlyAndDailyModel> {
@@ -35,22 +36,24 @@ fun HourlyAndDailyDto.hourlyModel(): List<HourlyAndDailyModel> {
         val backGround = getBackGroundColor(hour)
         val newIcon = convertIcon(it.weather.firstOrNull()?.icon)
         HourlyAndDailyModel(
-            temperature = it.main.temp.toInt() ,
+            temperature = it.main.temp.toInt(),
             time = timeInString,
             icon = newIcon,
-            backGroundColor = backGround ,
+            backGroundColor = backGround,
             day = ""
         )
     }
 
 }
 
-fun HourlyAndDailyDto.mapDailyDtoToModel() : List<HourlyAndDailyModel>{
+fun HourlyAndDailyDto.mapDailyDtoToModel(): List<HourlyAndDailyModel> {
 
     return list.filter {
         val formattedTime = convertUnixToHour(it.dt)
-        formattedTime.equals("11 AM", ignoreCase = true)
+        formattedTime.equals("11 AM", ignoreCase = true) ||
+                formattedTime.equals("١١ ص", ignoreCase = true)
     }.map {
+        Log.i("daily", "mapDailyDtoToModel: ${it.dt}")
         val day = convertUnixToDayOfWeek(dt = it.dt)
         val timeInString = convertUnixToHour(it.dt)
         val timeInInt = convertHourToInt(timeInString)
@@ -60,7 +63,7 @@ fun HourlyAndDailyDto.mapDailyDtoToModel() : List<HourlyAndDailyModel>{
             temperature = it.main.temp.toInt(),
             time = timeInString,
             icon = newIcon,
-            backGroundColor = backGround ,
+            backGroundColor = backGround,
             day = day
         )
     }
@@ -71,6 +74,7 @@ fun getCurrentDay(timeZone: Int): String {
     val adjustedTime = currentUtc + timeZone
     return convertUnixToDate(adjustedTime)
 }
+
 private fun getHourFromAdjustedDt(adjustedDt: Long): Int {
     val date = Date(adjustedDt * 1000L)
     val calendar = Calendar.getInstance().apply { time = date }
@@ -112,7 +116,6 @@ fun convertIcon(icon: String?): Int {
 }
 
 
-
 fun convertHourToInt(time: String): Int {
     val format = SimpleDateFormat("h a", Locale.getDefault())
     val date = format.parse(time) ?: return -1
@@ -124,7 +127,7 @@ fun convertHourToInt(time: String): Int {
 fun getBackGroundColor(time: Int): Color {
     return when (time) {
         in 6..13 -> blue
-        in 14..17 -> Color(0xFFFFA500)
+        in 14..17 -> orange
         in 18..19 -> Color.Red
         in 20..23, in 0..5 -> nightColor
         else -> Color.Black

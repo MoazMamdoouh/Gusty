@@ -1,7 +1,9 @@
 package com.example.gusty
 
 import android.content.Context
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -50,16 +52,17 @@ import com.example.gusty.utilities.ButtonNavyItems
 import com.example.gusty.utilities.LocalHelper
 import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.MyNavGraph
+import com.example.gusty.utilities.NetworkConnectionBroadCast
 import com.example.gusty.utilities.Routes
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
 class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationProvider: FusedLocationProviderClient
+    private lateinit var networkConnectionBroadCast: NetworkConnectionBroadCast
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
+        registerBroadcastReceiver()
         setContent {
             val factory =
                 HomeFactory(
@@ -160,6 +163,14 @@ class MainActivity : ComponentActivity() {
             }
 
         }
+
+    }
+    private fun registerBroadcastReceiver() {
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
+
+        networkConnectionBroadCast = NetworkConnectionBroadCast()
+        registerReceiver(networkConnectionBroadCast, intentFilter)
     }
 
     override fun attachBaseContext(newBase: Context) {
@@ -213,5 +224,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(networkConnectionBroadCast)
     }
 }

@@ -22,6 +22,7 @@ import com.example.gusty.data.remote.GustyRemoteDataSourceImpl
 import com.example.gusty.data.remote.RetrofitService
 import com.example.gusty.data.repo.GustyRepoImpl
 import com.example.gusty.home.model.mapDtoToModel
+import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.setting.UnitPreference
 import com.example.gusty.utilities.LocationPermission
 import kotlinx.coroutines.flow.first
@@ -46,7 +47,8 @@ class NotificationBroadCastReceiver : BroadcastReceiver() {
                 )
                 repo.getCurrentWeather(LocationPermission.locationState.value.latitude ,
                     LocationPermission.locationState.value.longitude
-                    , UnitPreference.getUnitSharedPreference(context) ?: "metric")
+                    , UnitPreference.getUnitSharedPreference(context) ?: "metric" ,
+                    LanguagePreference.getLanguagePref(context)?: "en")
                     .map { dto -> dto.mapDtoToModel() }
                     .first()
             }
@@ -136,17 +138,3 @@ private fun createNotificationChannel(context: Context, channelId: String) {
         notificationManager.createNotificationChannel(channel)
     }
 }
-/*val action = intent?.action
-        if(action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)){
-            Toast.makeText(context, "Wifi status changed " , Toast.LENGTH_SHORT).show()
-            val cm : ConnectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val actionNetwork : NetworkInfo? = cm.activeNetworkInfo
-
-            val isConnected : Boolean = actionNetwork != null && actionNetwork.isConnectedOrConnecting
-            if (isConnected){
-                Toast.makeText(context, "NetWork Connected" , Toast.LENGTH_LONG).show()
-            }else {
-                Toast.makeText(context, "NetWork not Connected" , Toast.LENGTH_LONG).show()
-            }
-        }
- */

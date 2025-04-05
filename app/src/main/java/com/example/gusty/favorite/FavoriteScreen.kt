@@ -52,6 +52,7 @@ import com.example.gusty.R
 import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.home.HomeScreen
 import com.example.gusty.home.HomeViewModel
+import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.setting.Preference
 import com.example.gusty.setting.UnitPreference
 import com.example.gusty.ui.theme.gray
@@ -280,7 +281,8 @@ fun OpenAddToFavoriteDialog(
                     favoriteViewModel.getCurrentWeatherForFavorite(
                         it.latitude,
                         clickedLocation.longitude ,
-                        UnitPreference.getUnitSharedPreference(context) ?: "metric"
+                        UnitPreference.getUnitSharedPreference(context) ?: "metric" ,
+                        LanguagePreference.getLanguagePref(context) ?:"en"
                     )
                 }
             }) {

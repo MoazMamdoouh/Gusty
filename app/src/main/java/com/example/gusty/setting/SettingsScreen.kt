@@ -1,5 +1,8 @@
 package com.example.gusty.setting
 
+import android.content.Context
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +25,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -99,6 +103,7 @@ fun LanguageCard() {
                     onClick = {
                         LanguagePreference.setLanguagePref(context , "en")
                         selectedArOrEn = LanguageEnum.ENGLISH
+                        restartApp(context)
                     },
                     label = {
                         Text(stringResource(R.string.english))
@@ -128,6 +133,7 @@ fun LanguageCard() {
                     onClick = {
                         LanguagePreference.setLanguagePref(context , "ar")
                         selectedArOrEn = LanguageEnum.ARABIC
+                        restartApp(context)
                     },
                     label = {
                         Text(stringResource(R.string.arabic))
@@ -443,3 +449,12 @@ fun WindSettingsCard() {
         }
     }
 }
+
+fun restartApp(context: Context) {
+    val activity = context as? ComponentActivity
+    val intent = activity?.intent
+    intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+    activity?.finish()
+    activity?.startActivity(intent)
+}
+

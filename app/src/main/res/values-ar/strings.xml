@@ -46,4 +46,8 @@
     <string name="favorite">المفضلة</string>
     <string name="notification">الإشعارات</string>
     <string name="sittings">الإعدادات</string>
+    <string name="deg">"درجة: "</string>
+    <string name="gust">"هَبَّة: "</string>
+    <string name="km_h">كم/س</string>
+    <string name="hpa">هيكتوباسكال</string>
 </resources>
