@@ -3,6 +3,7 @@ package com.example.gusty.favorite
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,9 +39,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,8 +52,10 @@ import com.example.gusty.R
 import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.home.HomeScreen
 import com.example.gusty.home.HomeViewModel
+import com.example.gusty.setting.Preference
 import com.example.gusty.setting.UnitPreference
 import com.example.gusty.ui.theme.gray
+import com.example.gusty.utilities.BackGrounds
 import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.UiStateResult
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -65,6 +70,7 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel , homeViewModel: HomeVie
     val listOfFavorite = favoriteViewModel.listOfFavorite.collectAsStateWithLifecycle().value
     val loadingState = remember { mutableStateOf(false) }
     val isMapOpen = rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
 
     favoriteViewModel.getListOfFavoriteItems()
     Scaffold(
@@ -80,28 +86,36 @@ fun FavoriteScreen(favoriteViewModel: FavoriteViewModel , homeViewModel: HomeVie
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+
             when (listOfFavorite) {
                 is UiStateResult.Failure -> Log.i(
-                    "TAG",
-                    "FavoriteScreen: ${listOfFavorite.exception.message} "
+                    "TAG", "FavoriteScreen: ${listOfFavorite.exception.message} "
                 )
                 UiStateResult.Loading -> loadingState.value = true
                 is UiStateResult.Success -> {
-                    loadingState.value = false
-                    LazyColumn {
-                        itemsIndexed(listOfFavorite.response) { _, favoriteItem ->
-                            FavoriteItem(favoriteItem, favoriteViewModel , homeViewModel)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    listOf(
+                                       BackGrounds.getFirstBackGround(),
+                                       BackGrounds.getSecondBackGround()
+                                    )
+                                )
+                            )
+                    ) {
+                        loadingState.value = false
+                        LazyColumn {
+                            itemsIndexed(listOfFavorite.response) { _, favoriteItem ->
+                                FavoriteItem(favoriteItem, favoriteViewModel, homeViewModel)
+                            }
                         }
                     }
                 }
             }
-            if (loadingState.value) CircularProgressIndicator()
-        }
+        if (loadingState.value) CircularProgressIndicator()
         if (isMapOpen.value) {
             GoogleMapView(favoriteViewModel)
         }
@@ -247,15 +261,12 @@ fun OpenAddToFavoriteDialog(
                     )
 
                 UiStateResult.Loading -> {
-                    Log.i("TAG", "OpenDialog:loading ")
                     loadingSate = true
                 }
 
                 is UiStateResult.Success -> {
-                    Log.i("TAG", "OpenDialog:success before insertion ")
                     favoriteViewModel.insertToFavorite(favoriteCurrentWeatherObject.response)
                     onDismiss.invoke()
-                    Log.i("TAG", "insertionDone ")
                 }
             }
         }
@@ -264,7 +275,6 @@ fun OpenAddToFavoriteDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = {
-                Log.i("TAG", "OpenDialog:button clicked ")
                 isRequested = true
                 clickedLocation?.let {
                     favoriteViewModel.getCurrentWeatherForFavorite(
@@ -274,8 +284,9 @@ fun OpenAddToFavoriteDialog(
                     )
                 }
             }) {
+
                 Text(
-                    if (isRequested) "Loading..." else "Add to Favorite",
+                    if (isRequested) stringResource(R.string.loading) else stringResource(R.string.add_to_favorite),
                     fontWeight = FontWeight.Bold,
                     color = Color.Green
                 )
@@ -284,15 +295,16 @@ fun OpenAddToFavoriteDialog(
         ,
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel" , color = Color.Black)
+                Text(stringResource(R.string.cancel) , color = Color.Black)
             }
         },
         title = {
-            Text(text = "Add to favorite" , color = Color.Black , fontSize = 32.sp )
+            Text(text = stringResource(R.string.add_to_favorite) , color = Color.Black , fontSize = 32.sp )
         }
             ,
         text = {
-            Text("Do u want to add this Place to Favorite Places" ,
+            Text(
+                stringResource(R.string.do_u_want_to_add_this_place_to_favorite_places) ,
                 fontSize = 20.sp,
                 color = Color.Black)
         }
@@ -312,17 +324,17 @@ fun OpenDeleteFromFavoriteDialog(
                 favoriteViewModel.deleteLocationFromFavorite(favoriteEntity)
                 onDismiss.invoke()
             }) {
-                Text("Delete ", color = Color.Red)
+                Text(stringResource(R.string.delete), color = Color.Red)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
         title = {
             Text(
-                text = "Delete Location",
+                text = stringResource(R.string.delete_location),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -330,7 +342,7 @@ fun OpenDeleteFromFavoriteDialog(
         },
         text = {
             Text(
-                "Are you sure u want to delete this location ?",
+                stringResource(R.string.are_you_sure_u_want_to_delete_this_location),
                 fontSize = 20.sp,
                 color = Color.Black
             )

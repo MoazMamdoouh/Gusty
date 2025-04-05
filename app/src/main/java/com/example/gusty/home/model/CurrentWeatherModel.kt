@@ -7,6 +7,7 @@ import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
 import com.example.gusty.data.model.curren_weather_dto.Rain
 import com.example.gusty.data.model.curren_weather_dto.Weather
 import com.example.gusty.data.model.curren_weather_dto.Wind
+import com.example.gusty.setting.UnitPreference
 import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.dark_blue
 import com.example.gusty.ui.theme.light_orange

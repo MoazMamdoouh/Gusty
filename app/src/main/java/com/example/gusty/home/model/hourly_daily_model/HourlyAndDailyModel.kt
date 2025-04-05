@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.example.gusty.R
 import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto
+import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.nightColor
 import java.text.SimpleDateFormat
@@ -31,7 +32,6 @@ fun HourlyAndDailyDto.hourlyModel(): List<HourlyAndDailyModel> {
         val adjustTimeStamp = it.dt + timeZone
         val hour = getHourFromAdjustedDt(adjustTimeStamp)
         val timeInString = convertUnixToHour(adjustTimeStamp)
-        val timeInInt = convertHourToInt(timeInString)
         val backGround = getBackGroundColor(hour)
         val newIcon = convertIcon(it.weather.firstOrNull()?.icon)
         HourlyAndDailyModel(

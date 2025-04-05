@@ -1,6 +1,5 @@
 package com.example.gusty.alarm
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -9,16 +8,13 @@ import com.example.gusty.data.local.alarm.AlarmEntity
 import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
 import com.example.gusty.data.repo.GustyRepo
 import com.example.gusty.utilities.UiStateResult
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.TimeZone
 
 
@@ -48,7 +44,7 @@ class AlarmViewModel(private val repo: GustyRepo) : ViewModel() {
     }
 
     fun insertAlarm(
-        context: Context,
+        androidAlarmManager: AndroidAlarmManager,
         id: Int,
         day: String,
         time: String,
@@ -56,7 +52,6 @@ class AlarmViewModel(private val repo: GustyRepo) : ViewModel() {
         duration: Long
     ) {
         viewModelScope.launch {
-            val androidAlarmManager = AndroidAlarmManager(context)
             val alarmEntity = AlarmEntity(
                 id,
                 day,

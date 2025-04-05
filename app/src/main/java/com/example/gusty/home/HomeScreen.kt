@@ -22,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,13 +49,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gusty.R
 import com.example.gusty.home.model.CurrentWeatherModel
 import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
+import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.setting.Preference
 import com.example.gusty.setting.UnitPreference
 import com.example.gusty.setting.WindPreference
+import com.example.gusty.utilities.BackGrounds
 import com.example.gusty.utilities.UiStateResult
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double = 0.0) {
+fun HomeScreen(homeViewModel: HomeViewModel, lat: Double = 0.0, lon: Double = 0.0) {
     val currentWeatherViewModel = homeViewModel.currentWeather.collectAsStateWithLifecycle().value
     val hourlyWeatherViewModel = homeViewModel.hourlyWeather.observeAsState()
     val dailyWeatherViewModel = homeViewModel.dailyWeather.observeAsState()
@@ -74,20 +75,38 @@ fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double 
             secondBackground = currentWeatherViewModel.response.secondBackGroundColor
         }
     }
-
     LaunchedEffect(finalLat, finalLon) {
-        homeViewModel.getCurrentWeather(finalLat, finalLon ,
-            UnitPreference.getUnitSharedPreference(context) ?: "metric")
-        homeViewModel.getHourlyWeather(finalLat,finalLon ,
-            UnitPreference.getUnitSharedPreference(context) ?: "metric")
-        homeViewModel.getDailyWeather(finalLat,finalLon ,
-            UnitPreference.getUnitSharedPreference(context) ?: "metric")
+        homeViewModel.getCurrentWeather(
+            finalLat, finalLon,
+            UnitPreference.getUnitSharedPreference(context) ?: "metric"
+        )
+        homeViewModel.getHourlyWeather(
+            finalLat, finalLon,
+            UnitPreference.getUnitSharedPreference(context) ?: "metric"
+        )
+        homeViewModel.getDailyWeather(
+            finalLat, finalLon,
+            UnitPreference.getUnitSharedPreference(context) ?: "metric"
+        )
     }
 
-    when(currentWeatherViewModel){
-        is UiStateResult.Failure -> Log.i("TAG", "HomeScreen failure in UI state ")
-        is UiStateResult.Loading -> Log.i("TAG", "HomeScreen Loading in UI state ")
+    val unitAsChar = remember { mutableStateOf("") }
+    val lang = LanguagePreference.getLanguagePref(context)
+    when (UnitPreference.getUnitSharedPreference(context) ) {
+        "metric" -> if(lang == "en")unitAsChar.value = "C" else unitAsChar.value =  "س"
+        "imperial" -> if(lang == "en")unitAsChar.value = "F" else unitAsChar.value =  "ف"
+        "standard" ->if(lang == "en")unitAsChar.value = "K" else unitAsChar.value =  "ك"
+    }
+
+    when (currentWeatherViewModel) {
+        is UiStateResult.Failure -> {
+
+            Log.i("home", "HomeScreen failure in UI state ")
+        }
+        is UiStateResult.Loading -> Log.i("home", "HomeScreen Loading in UI state ")
         is UiStateResult.Success -> {
+            BackGrounds.setFirstBackGround(background)
+            BackGrounds.setSecondBackGround(secondBackground)
             Column(
                 modifier = Modifier
                     .verticalScroll(scrollState)
@@ -102,9 +121,14 @@ fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double 
                     .fillMaxSize()
             ) {
                 Spacer(Modifier.height(10.dp))
-                DailyWeatherInfoCard(currentWeatherViewModel.response)
+                DailyWeatherInfoCard(currentWeatherViewModel.response , unitAsChar)
                 Spacer(Modifier.height(10.dp))
-                DailyAndHourlyWeatherCard(hourlyWeatherViewModel , dailyWeatherViewModel , currentWeatherViewModel.response.backgroundColor)
+                DailyAndHourlyWeatherCard(
+                    hourlyWeatherViewModel,
+                    dailyWeatherViewModel,
+                    currentWeatherViewModel.response.backgroundColor ,
+                    unitAsChar
+                )
                 Spacer(Modifier.height(10.dp))
                 Row {
                     WindCard(currentWeatherViewModel.response)
@@ -120,8 +144,13 @@ fun HomeScreen(homeViewModel: HomeViewModel , lat : Double = 0.0 , lon : Double 
     }
 
 }
+
 @Composable
-fun DailyWeatherInfoCard(currentWeatherViewModel: CurrentWeatherModel ) {
+fun DailyWeatherInfoCard(
+    currentWeatherViewModel: CurrentWeatherModel,
+    unitAsChar: MutableState<String>
+) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -162,7 +191,7 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: CurrentWeatherModel ) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.c), modifier = Modifier.padding(5.dp), color = Color.White
+                    text = unitAsChar.value, modifier = Modifier.padding(5.dp), color = Color.White , fontSize = 30.sp
                 )
             }
             currentWeatherViewModel.weather[0].description.let {
@@ -187,7 +216,10 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: CurrentWeatherModel ) {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = stringResource(R.string.c), modifier = Modifier.padding(5.dp), color = Color.White
+                        text = unitAsChar.value,
+                        modifier = Modifier.padding(5.dp),
+                        color = Color.White
+                        , fontSize = 15.sp
                     )
                     Text(
                         " / ", fontSize = 15.sp, modifier = Modifier
@@ -203,7 +235,10 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: CurrentWeatherModel ) {
                     )
 
                     Text(
-                        text = stringResource(R.string.c), modifier = Modifier.padding(5.dp), color = Color.White
+                        text = unitAsChar.value,
+                        modifier = Modifier.padding(5.dp),
+                        color = Color.White
+                        , fontSize = 20.sp
                     )
                     Text(
                         text = stringResource(R.string.feels_like),
@@ -223,7 +258,10 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: CurrentWeatherModel ) {
                     )
 
                     Text(
-                        text =stringResource(R.string.c), modifier = Modifier.padding(5.dp), color = Color.White
+                        text = unitAsChar.value,
+                        modifier = Modifier.padding(5.dp),
+                        color = Color.White ,
+                        fontSize = 20.sp
                     )
                 }
 
@@ -232,11 +270,13 @@ fun DailyWeatherInfoCard(currentWeatherViewModel: CurrentWeatherModel ) {
 
     }
 }
+
 @Composable
 fun DailyAndHourlyWeatherCard(
     hourlyWeatheViewModel: State<List<HourlyAndDailyModel>?>,
     dailyWeatherViewModel: State<List<HourlyAndDailyModel>?>,
-    backgroundColor: Color
+    backgroundColor: Color,
+    unitAsChar: MutableState<String>
 ) {
     val context = LocalContext.current
     val selectOption = remember { mutableStateOf(context.getString(R.string.hourly)) }
@@ -258,9 +298,11 @@ fun DailyAndHourlyWeatherCard(
                 .fillMaxWidth()
                 .padding(5.dp)
         ) {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+            ) {
                 Button(
                     onClick = { selectOption.value = context.getString(R.string.hourly) },
                     modifier = Modifier
@@ -272,7 +314,7 @@ fun DailyAndHourlyWeatherCard(
                     )
                 ) {
                     Text(
-                        text =context.getString(R.string.hourly),
+                        text = context.getString(R.string.hourly),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -294,10 +336,11 @@ fun DailyAndHourlyWeatherCard(
                     )
                 }
             }
-            IsHourlyOrDaily(selectOption , hourlyWeatheViewModel , dailyWeatherViewModel )
+            IsHourlyOrDaily(selectOption, hourlyWeatheViewModel, dailyWeatherViewModel , unitAsChar)
         }
     }
 }
+
 @Composable
 fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
     val context = LocalContext.current
@@ -335,9 +378,11 @@ fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 5.dp)) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.speed),
                     color = Color.White,
@@ -346,16 +391,18 @@ fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
                 )
                 Text(
                     text = " ${currentWeatherViewModel.wind.speed} " +
-                    WindPreference.getWindSharedPreference(context),
+                            WindPreference.getWindSharedPreference(context),
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Row(modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 5.dp)) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
                 Text(
                     text = "deg : ",
                     color = Color.White,
@@ -368,12 +415,19 @@ fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Text(text = stringResource(R.string.o), color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.o),
+                    color = Color.White,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
-            Row(modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 5.dp)) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
                 Text(
                     text = "gust  : ",
                     color = Color.White,
@@ -390,6 +444,7 @@ fun WindCard(currentWeatherViewModel: CurrentWeatherModel) {
         }
     }
 }
+
 @Composable
 fun RainCard(currentWeatherViewModel: CurrentWeatherModel) {
     Card(
@@ -426,9 +481,11 @@ fun RainCard(currentWeatherViewModel: CurrentWeatherModel) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 5.dp)) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.last_hour),
                     color = Color.White,
@@ -445,6 +502,7 @@ fun RainCard(currentWeatherViewModel: CurrentWeatherModel) {
         }
     }
 }
+
 @Composable
 fun CloudCard(currentWeatherViewModel: CurrentWeatherModel) {
     Card(
@@ -481,9 +539,11 @@ fun CloudCard(currentWeatherViewModel: CurrentWeatherModel) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 5.dp)) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.clouds),
                     color = Color.White,
@@ -500,6 +560,7 @@ fun CloudCard(currentWeatherViewModel: CurrentWeatherModel) {
         }
     }
 }
+
 @Composable
 fun PressureCard(currentWeatherViewModel: CurrentWeatherModel) {
     Card(
@@ -536,9 +597,11 @@ fun PressureCard(currentWeatherViewModel: CurrentWeatherModel) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 5.dp)) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.pressure_),
                     color = Color.White,
@@ -555,30 +618,33 @@ fun PressureCard(currentWeatherViewModel: CurrentWeatherModel) {
         }
     }
 }
+
 @Composable
 fun IsHourlyOrDaily(
     selectOption: MutableState<String>,
     hourlyWeatherViewModel: State<List<HourlyAndDailyModel>?>,
-    dailyWeatherViewModel: State<List<HourlyAndDailyModel>?>
+    dailyWeatherViewModel: State<List<HourlyAndDailyModel>?>,
+    unitAsChar: MutableState<String>
 ) {
 
 
     if (selectOption.value == stringResource(R.string.hourly)) {
         LazyRow {
-            itemsIndexed(hourlyWeatherViewModel.value.orEmpty()){ _, hour ->
-                HourlyWeatherItem(hour)
+            itemsIndexed(hourlyWeatherViewModel.value.orEmpty()) { _, hour ->
+                HourlyWeatherItem(hour , unitAsChar)
             }
         }
     } else {
         LazyRow {
             itemsIndexed(dailyWeatherViewModel.value.orEmpty()) { _, daily ->
-                DailyWeatherItem(daily)
+                DailyWeatherItem(daily , unitAsChar)
             }
         }
     }
 }
+
 @Composable
-fun HourlyWeatherItem(hour: HourlyAndDailyModel) {
+fun HourlyWeatherItem(hour: HourlyAndDailyModel, unitAsChar: MutableState<String>) {
     Column(
         modifier = Modifier
             .padding(start = 3.dp, end = 3.dp)
@@ -604,15 +670,15 @@ fun HourlyWeatherItem(hour: HourlyAndDailyModel) {
                     )
             ) {
                 Image(
-                    painter = painterResource(hour.icon)
-                    , contentDescription = "weather_icon"
-                    , modifier = Modifier
+                    painter = painterResource(hour.icon),
+                    contentDescription = "weather_icon",
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
                         .padding(top = 5.dp)
                 )
                 Text(
-                    text = stringResource(R.string.c),
+                    text = unitAsChar.value,
                     color = Color.White,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
@@ -621,7 +687,7 @@ fun HourlyWeatherItem(hour: HourlyAndDailyModel) {
                         .padding(top = 8.dp, start = 50.dp)
                 )
                 Text(
-                   "${hour.temperature}",
+                    "${hour.temperature}",
                     color = Color.White,
                     fontSize = 40.sp,
                     textAlign = TextAlign.Center,
@@ -640,33 +706,37 @@ fun HourlyWeatherItem(hour: HourlyAndDailyModel) {
 }
 
 @Composable
-fun DailyWeatherItem(daily: HourlyAndDailyModel) {
+fun DailyWeatherItem(daily: HourlyAndDailyModel, unitAsChar: MutableState<String>) {
     Column(
         modifier = Modifier
             .padding(start = 3.dp, end = 3.dp)
     ) {
-        Column (
+        Column(
             modifier = Modifier
                 .size(width = 140.dp, height = 200.dp)
                 .padding(start = 20.dp, end = 20.dp, top = 15.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    , verticalArrangement = Arrangement.Center ,
+                    .fillMaxSize(), verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = daily.day , fontSize = 18.sp , fontWeight = FontWeight.Bold , color = Color.Black)
+                Text(
+                    text = daily.day,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
                 Image(
-                    painter = painterResource(daily.icon)
-                    , contentDescription = "weather_icon"
-                    , modifier = Modifier
+                    painter = painterResource(daily.icon),
+                    contentDescription = "weather_icon",
+                    modifier = Modifier
                         .width(60.dp)
                         .height(60.dp)
                         .padding(top = 5.dp)
                 )
                 Text(
-                    text = stringResource(R.string.c),
+                    text =unitAsChar.value,
                     color = Color.Black,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,

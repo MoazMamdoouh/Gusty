@@ -3,6 +3,7 @@ package com.example.gusty.alarm
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,9 +33,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberDatePickerState
@@ -48,9 +49,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,8 +61,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gusty.R
 import com.example.gusty.data.local.alarm.AlarmEntity
 import com.example.gusty.setting.UnitPreference
-import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.gray
+import com.example.gusty.ui.theme.transparentBlack
+import com.example.gusty.utilities.BackGrounds
 import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.UiStateResult
 import java.text.SimpleDateFormat
@@ -72,7 +76,9 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel) {
     val isLoading = remember { mutableStateOf(false) }
     val isBottomSheetOpened = remember { mutableStateOf(false) }
     val alarmUiState = alarmViewModel.listOfAlarms.collectAsStateWithLifecycle().value
+
     alarmViewModel.getAllAlarmsFromDataBase()
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -86,17 +92,26 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel) {
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-        ) {
-            when (alarmUiState) {
-                is UiStateResult.Failure -> {
-                    Log.i("TAG", "")
-                }
 
-                is UiStateResult.Success -> {
+        when (alarmUiState) {
+            is UiStateResult.Failure -> {
+                Log.i("TAG", "")
+            }
+
+            is UiStateResult.Success -> {
+                Column(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    BackGrounds.getFirstBackGround(),
+                                    BackGrounds.getSecondBackGround()
+                                )
+                            )
+                        )
+                ) {
                     isLoading.value = false
                     LazyColumn {
                         itemsIndexed(alarmUiState.response) { _, alarm ->
@@ -104,17 +119,18 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel) {
                         }
                     }
                 }
-
-                UiStateResult.Loading -> isLoading.value = true
             }
-            if (isBottomSheetOpened.value) OpenButtonSheet(
-                onDismiss = {
-                    isBottomSheetOpened.value = false
-                }, alarmViewModel
-            )
+
+            UiStateResult.Loading -> isLoading.value = true
         }
+        if (isBottomSheetOpened.value) OpenButtonSheet(
+            onDismiss = {
+                isBottomSheetOpened.value = false
+            }, alarmViewModel
+        )
     }
 }
+
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,13 +143,19 @@ fun OpenButtonSheet(
     val buttonSheetState = androidx.compose.material3.rememberModalBottomSheetState()
     val openCalenderState = remember { mutableStateOf(false) }
     val openTimePickerState = remember { mutableStateOf(false) }
-    val timeInTimeFormat = remember { mutableLongStateOf(0) }
     val currentWeather = alarmViewModel.currentWeather.collectAsStateWithLifecycle().value
-    var formattedDate = " "
     val isLoading = remember { mutableStateOf(false) }
     val currentDateMillis = System.currentTimeMillis()
+    val formatedTimeToDisplay = remember { mutableStateOf("HH/MM Am") }
+    val isTimeValid = remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = currentDateMillis
+        initialSelectedDateMillis = currentDateMillis,
+        initialDisplayedMonthMillis = currentDateMillis ,
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis >= currentDateMillis
+            }
+        }
     )
     val currentTime = Calendar.getInstance()
     val timePickerState = rememberTimePickerState(
@@ -143,15 +165,39 @@ fun OpenButtonSheet(
     )
     var timeStamp by remember { mutableLongStateOf(0) }
 
-    LaunchedEffect(currentWeather) {
-
+    val formattedDateForDisplay = remember { mutableStateOf("dd/mm/yyyy") }
+    LaunchedEffect(datePickerState.selectedDateMillis) {
+        datePickerState.selectedDateMillis?.let { millis ->
+            if (millis != 0L) {
+                formattedDateForDisplay.value = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    .format(Date(millis))
+            }
+        }
     }
 
+    LaunchedEffect(timePickerState.hour, timePickerState.minute) {
+        val hour = timePickerState.hour
+        val minute = timePickerState.minute
+        val amPm = if (hour in 0..11) "AM" else "PM"
+        val hourFormatted = if (hour % 12 == 0) 12 else hour % 12
+        val minuteFormatted = String.format("%02d", minute)
+        formatedTimeToDisplay.value = "$hourFormatted:$minuteFormatted $amPm"
+    }
+
+    LaunchedEffect(timePickerState.hour, timePickerState.minute) {
+        if (timePickerState.hour <= currentTime.get(Calendar.HOUR_OF_DAY)
+            && timePickerState.minute <= currentTime.get(Calendar.MINUTE)
+        ) {
+            isTimeValid.value = false
+        } else {
+            isTimeValid.value = true
+        }
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = buttonSheetState,
         modifier = Modifier
-            .fillMaxSize(), containerColor = blue
+            .fillMaxSize(), containerColor = transparentBlack
     ) {
         Column {
             Row {
@@ -164,7 +210,7 @@ fun OpenButtonSheet(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Select Date",
+                        text = stringResource(R.string.select_date),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -179,23 +225,24 @@ fun OpenButtonSheet(
                             contentColor = Color.Black
                         )
                     ) {
-                        Text(text = "Open calender", color = Color.Black)
+                        Text(text = stringResource(R.string.open_calender), color = Color.Black)
                     }
-                    TextField(
-                        value = if (datePickerState.selectedDateMillis != 0L) {
-                            formattedDate =
-                                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(
-                                    Date(datePickerState.selectedDateMillis ?: 0)
-                                )
-                            formattedDate
-                        } else {
-                            "Select a date"
-                        },
-                        onValueChange = {
-                        },
-                        label = { Text("Selected Date") },
-                        enabled = false
+
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.selected_date),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
                     )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = formattedDateForDisplay.value,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+
                 }
                 Spacer(Modifier.width(10.dp))
                 Column(
@@ -207,7 +254,7 @@ fun OpenButtonSheet(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Select Time",
+                        text = stringResource(R.string.select_time),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -222,35 +269,39 @@ fun OpenButtonSheet(
                             contentColor = Color.Black
                         )
                     ) {
-                        Text(text = "Open Timer", color = Color.Black)
+                        Text(text = stringResource(R.string.open_timer), color = Color.Black)
                     }
-                    TextField(
-                        value = if (timeInTimeFormat.longValue != 0L) {
-                            val hours = (timeInTimeFormat.longValue / 3600).toInt()
-                            val minutes = ((timeInTimeFormat.longValue % 3600) / 60).toInt()
-                            String.format("%02d:%02d", hours, minutes)
-                        } else {
-                            "Select Time"
-                        },
-                        onValueChange = {
-                        },
-                        label = { Text("Selected Time") },
-                        enabled = false
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = if (isTimeValid.value) stringResource(R.string.time_picked)
+                        else stringResource(R.string.time_is_not_valid),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = formatedTimeToDisplay.value,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
                     )
                 }
             }
             Spacer(Modifier.height(15.dp))
             Button(
+                enabled = if (isTimeValid.value) true else false,
                 onClick = {
                     alarmViewModel.getCurrentWeather(
                         LocationPermission.locationState.value.latitude,
-                        LocationPermission.locationState.value.longitude ,
+                        LocationPermission.locationState.value.longitude,
                         UnitPreference.getUnitSharedPreference(context) ?: "metric"
                     )
                     when (currentWeather) {
                         is UiStateResult.Loading -> {
                             isLoading.value = true
                         }
+
                         is UiStateResult.Failure -> Log.i("TAG", "Failed to insert")
                         is UiStateResult.Success -> {
                             isLoading.value = false
@@ -260,14 +311,14 @@ fun OpenButtonSheet(
                                 hour = timePickerState.hour,
                                 stamp = timeStamp
                             )
-                            // androidManager(context)
+                            val androidAlarmManager = AndroidAlarmManager(context)
                             alarmViewModel.insertAlarm(
-                                context,
+                                androidAlarmManager,
                                 id = duration.toInt() / 1000,
-                                day = formattedDate,
+                                day = formattedDateForDisplay.value,
                                 place = countryName,
                                 duration = duration,
-                                time = "3,3"
+                                time = formatedTimeToDisplay.value
                             )
                         }
                     }
@@ -278,7 +329,12 @@ fun OpenButtonSheet(
                     .fillMaxWidth()
                     .padding(start = 15.dp, end = 15.dp)
             ) {
-                Text(text = if(isLoading.value)" Loading " else " Save Alarm ", color = Color.Black)
+                Text(
+                    text = if (isLoading.value) stringResource(R.string.loading) else stringResource(
+                        R.string.save_alarm
+                    ),
+                    color = Color.Black
+                )
             }
 
         }
@@ -286,14 +342,12 @@ fun OpenButtonSheet(
             onDateSelected = {
                 openCalenderState.value = false
                 timeStamp = it ?: 0
-                Log.i("TAG", "date time stamp $it ")
             },
             onDismiss = { openCalenderState.value = false }, datePickerState
         )
         if (openTimePickerState.value) TimePickerDialog(
             onDismiss = {
                 openTimePickerState.value = false
-                Log.i("TAG", "OpenButtonSheet: ${timePickerState.hour} , ${timePickerState.minute}")
             }, timePickerState
         )
     }
@@ -314,12 +368,12 @@ fun DatePickerModal(
                 onDateSelected(datePickerState.selectedDateMillis)
                 onDismiss()
             }) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     ) {
@@ -340,15 +394,15 @@ fun TimePickerDialog(
             TextButton(onClick = {
                 onDismiss.invoke()
             }) {
-                Text("Confirm", color = Color.Black)
+                Text(stringResource(R.string.confirm), color = Color.Black)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel", color = Color.Black)
+                Text(stringResource(R.string.cancel), color = Color.Black)
             }
         },
-        title = { Text(text = "Select Time") },
+        title = { Text(text = stringResource(R.string.select_time)) },
         text = {
             DialExample(timePickerState)
         }
@@ -434,17 +488,17 @@ fun OpenDeleteFromAlarmDialog(
                 alarmViewModel.deleteAlarmFromDataBase(alarm)
                 onDismiss.invoke()
             }) {
-                Text("Delete ", color = Color.Red)
+                Text(stringResource(R.string.delete), color = Color.Red)
             }
         },
         dismissButton = {
             androidx.compose.material.TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
         title = {
             Text(
-                text = "Delete Alarm",
+                text = stringResource(R.string.delete_alarm),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -452,7 +506,7 @@ fun OpenDeleteFromAlarmDialog(
         },
         text = {
             Text(
-                "Are you sure u want to delete this Alarm ?",
+                stringResource(R.string.are_you_sure_u_want_to_delete_this_alarm),
                 fontSize = 20.sp,
                 color = Color.Black
             )

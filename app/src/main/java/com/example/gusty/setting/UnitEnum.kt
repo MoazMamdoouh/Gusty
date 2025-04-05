@@ -10,3 +10,11 @@ enum class WindUnitEnum {
     MS,
     MPH
 }
+enum class LocationEnum{
+    GPS ,
+    LOCATION
+}
+enum class LanguageEnum{
+    ARABIC ,
+    ENGLISH
+}

@@ -5,7 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+import com.example.gusty.data.local.FavoriteDataBase
 import com.example.gusty.data.local.alarm.AlarmEntity
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class OnActionBroadCast : BroadcastReceiver() {
 
@@ -17,8 +20,14 @@ class OnActionBroadCast : BroadcastReceiver() {
         val notificationManager = NotificationManagerCompat.from(context)
         notificationManager.cancel(request)
 
+        val alarmDao = FavoriteDataBase.getInstance(context).getAlarmDao()
+
         if(intent.action == DONE){
            androidAlarmManager.cancel(request)
+            GlobalScope.launch {
+                Log.i("TAG", "Done action inside the global scope ")
+                alarmDao.deleteAlarmByID(request)
+            }
         }else{
            androidAlarmManager.scheduler(request , 10000)
         }

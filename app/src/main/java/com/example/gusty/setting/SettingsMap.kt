@@ -56,7 +56,6 @@ fun GoogleMapViewOnSettings() {
                     CameraUpdateFactory.newLatLng(it)
                 )
                 openDialogState.value = true
-                Log.i("TAG", "On map clicked ")
                 clickedLocation?.let { newClick ->
                     clickedLocation = LatLng(newClick.latitude, newClick.longitude)
                 }

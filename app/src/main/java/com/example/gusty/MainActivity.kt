@@ -1,5 +1,6 @@
 package com.example.gusty
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
@@ -43,7 +45,9 @@ import com.example.gusty.favorite.FavoriteFactory
 import com.example.gusty.favorite.FavoriteViewModel
 import com.example.gusty.home.HomeFactory
 import com.example.gusty.home.HomeViewModel
+import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.utilities.ButtonNavyItems
+import com.example.gusty.utilities.LocalHelper
 import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.MyNavGraph
 import com.example.gusty.utilities.Routes
@@ -54,6 +58,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationProvider: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         setContent {
             val factory =
@@ -94,22 +99,22 @@ class MainActivity : ComponentActivity() {
 
             val buttonNavItems = listOf(
                 ButtonNavyItems(
-                    title = "Home",
+                    title = stringResource(R.string.home),
                     selectedIcon = Icons.Filled.Home,
                     unSelectedIcon = Icons.Outlined.Home
                 ),
                 ButtonNavyItems(
-                    title = "Favorite",
+                    title = stringResource(R.string.favorite),
                     selectedIcon = Icons.Filled.Favorite,
                     unSelectedIcon = Icons.Outlined.FavoriteBorder
                 ),
                 ButtonNavyItems(
-                    title = "Notification",
+                    title = stringResource(R.string.notification),
                     selectedIcon = Icons.Filled.Notifications,
                     unSelectedIcon = Icons.Outlined.Notifications
                 ),
                 ButtonNavyItems(
-                    title = "Sittings",
+                    title = stringResource(R.string.sittings),
                     selectedIcon = Icons.Filled.Settings,
                     unSelectedIcon = Icons.Outlined.Settings
                 )
@@ -155,6 +160,12 @@ class MainActivity : ComponentActivity() {
             }
 
         }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val currentLanguage = LanguagePreference.getLanguagePref(newBase)
+        val context = LocalHelper.setLocale(newBase , currentLanguage ?: "")
+        super.attachBaseContext(context)
     }
 
     override fun onResume() {

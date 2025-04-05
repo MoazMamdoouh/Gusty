@@ -2,6 +2,7 @@ package com.example.gusty.setting
 
 import android.annotation.SuppressLint
 import android.content.Context
+import org.intellij.lang.annotations.Language
 
 
 object Preference {
@@ -75,5 +76,19 @@ object WindPreference {
     fun getWindSharedPreference(context: Context) : String? {
         val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
         return sharedPref.getString("Wind_Unit", " ")
+    }
+}
+
+object LanguagePreference{
+    fun setLanguagePref(context: Context , language: String){
+        val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("language", language)
+            apply()
+        }
+    }
+    fun getLanguagePref(context: Context) : String?{
+        val sharedPref = context.getSharedPreferences("pref_shared", Context.MODE_PRIVATE)
+        return sharedPref.getString("language", " ")
     }
 }

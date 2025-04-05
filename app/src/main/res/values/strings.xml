@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Gusty</string>
-    <string name="c">C</string>
     <string name="feels_like">Feels Like</string>
     <string name="hourly">Hourly</string>
     <string name="daily">Daily</string>
@@ -12,4 +11,38 @@
     <string name="clouds">Clouds</string>
     <string name="pressure">Pressure</string>
     <string name="pressure_">"Pressure : "</string>
+    <string name="loading">Loading...</string>
+    <string name="add_to_favorite">Add to Favorite</string>
+    <string name="cancel">Cancel</string>
+    <string name="do_u_want_to_add_this_place_to_favorite_places">Do u want to add this Place to Favorite Places</string>
+    <string name="delete">"Delete "</string>
+    <string name="delete_location">Delete Location</string>
+    <string name="are_you_sure_u_want_to_delete_this_location">Are you sure u want to delete this location ?</string>
+    <string name="save_alarm">" Save Alarm "</string>
+    <string name="select_date">Select Date</string>
+    <string name="open_calender">Open calender</string>
+    <string name="selected_date">Selected Date</string>
+    <string name="select_time">Select Time</string>
+    <string name="open_timer">Open Timer</string>
+    <string name="time_picked">Time Picked</string>
+    <string name="confirm">Confirm</string>
+    <string name="ok">OK</string>
+    <string name="delete_alarm">Delete Alarm</string>
+    <string name="are_you_sure_u_want_to_delete_this_alarm">Are you sure u want to delete this Alarm ?</string>
+    <string name="time_is_not_valid">Time is not valid</string>
+    <string name="location">Location :</string>
+    <string name="celsius">Celsius</string>
+    <string name="gps">" GPS "</string>
+    <string name="m_s">M/S</string>
+    <string name="mph">MPH</string>
+    <string name="kelvin">Kelvin</string>
+    <string name="fahrenheit">Fahrenheit</string>
+    <string name="unit">Unit</string>
+    <string name="language">Language</string>
+    <string name="english">English</string>
+    <string name="arabic">Arabic</string>
+    <string name="home">Home</string>
+    <string name="favorite">Favorite</string>
+    <string name="notification">Notification</string>
+    <string name="sittings">Sittings</string>
 </resources>
