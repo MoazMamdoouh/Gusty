@@ -20,9 +20,10 @@ fun MyNavGraph(
     homeViewModel: HomeViewModel,
     favoriteViewModel: FavoriteViewModel,
     alarmViewModel: AlarmViewModel,
+    isNetworkConnect: Boolean,
 ) {
     NavHost(navController, startDestination = Routes.HOME.toString()) {
-        composable(Routes.HOME.toString()) { HomeScreen(homeViewModel) }
+        composable(Routes.HOME.toString()) { HomeScreen(homeViewModel , isNetworkConnected =  isNetworkConnect) }
         composable(Routes.FAVORITE.toString()) { FavoriteScreen(favoriteViewModel , homeViewModel )  }
         composable(Routes.ALARM.toString()) { AlarmScreen(alarmViewModel)  }
         composable(Routes.SETTINGS.toString()) { SettingScreen(navController) }

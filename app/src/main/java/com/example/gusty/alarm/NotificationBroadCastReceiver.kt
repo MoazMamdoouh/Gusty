@@ -23,6 +23,7 @@ import com.example.gusty.data.remote.RetrofitService
 import com.example.gusty.data.repo.GustyRepoImpl
 import com.example.gusty.home.model.mapDtoToModel
 import com.example.gusty.setting.LanguagePreference
+import com.example.gusty.setting.Preference
 import com.example.gusty.setting.UnitPreference
 import com.example.gusty.utilities.LocationPermission
 import kotlinx.coroutines.flow.first
@@ -45,8 +46,8 @@ class NotificationBroadCastReceiver : BroadcastReceiver() {
                         FavoriteDataBase.getInstance(context).getAlarmDao()
                     )
                 )
-                repo.getCurrentWeather(LocationPermission.locationState.value.latitude ,
-                    LocationPermission.locationState.value.longitude
+                repo.getCurrentWeather(Preference.getLatitudeSharedPreference(context) ,
+                    Preference.getLongitudeSharedPreference(context)
                     , UnitPreference.getUnitSharedPreference(context) ?: "metric" ,
                     LanguagePreference.getLanguagePref(context)?: "en")
                     .map { dto -> dto.mapDtoToModel() }
