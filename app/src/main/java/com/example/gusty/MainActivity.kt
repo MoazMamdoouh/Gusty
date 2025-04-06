@@ -2,6 +2,7 @@ package com.example.gusty
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -63,6 +64,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         NetworkManager.registerNetworkCallback(this)
+        systemLanguage()
         setContent {
             var isNetworkConnect by remember { mutableStateOf(false) }
 
@@ -80,7 +82,8 @@ class MainActivity : ComponentActivity() {
                         GustyRemoteDataSourceImpl.getInstance(RetrofitService.api),
                         GustyLocalDataSourceImpl.getInstance(
                             FavoriteDataBase.getInstance(this).getProductsDao(),
-                            FavoriteDataBase.getInstance(this).getAlarmDao()
+                            FavoriteDataBase.getInstance(this).getAlarmDao() ,
+                            FavoriteDataBase.getInstance(this).getHomeDao()
                         )
                     )
                 )
@@ -92,7 +95,8 @@ class MainActivity : ComponentActivity() {
                         GustyRemoteDataSourceImpl.getInstance(RetrofitService.api),
                         GustyLocalDataSourceImpl.getInstance(
                             FavoriteDataBase.getInstance(this).getProductsDao(),
-                            FavoriteDataBase.getInstance(this).getAlarmDao()
+                            FavoriteDataBase.getInstance(this).getAlarmDao() ,
+                            FavoriteDataBase.getInstance(this).getHomeDao()
                         )
                     )
                 )
@@ -104,7 +108,8 @@ class MainActivity : ComponentActivity() {
                         GustyRemoteDataSourceImpl.getInstance(RetrofitService.api),
                         GustyLocalDataSourceImpl.getInstance(
                             FavoriteDataBase.getInstance(this).getProductsDao(),
-                            FavoriteDataBase.getInstance(this).getAlarmDao()
+                            FavoriteDataBase.getInstance(this).getAlarmDao() ,
+                            FavoriteDataBase.getInstance(this).getHomeDao()
                         )
                     )
                 )
@@ -168,7 +173,8 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth()
                         .padding(innerPadding), contentAlignment = Alignment.Center
                 ) {
-                    MyNavGraph(navController, homeViewModel, favoriteViewModel , alarmViewModel,isNetworkConnect)
+                    MyNavGraph(navController, homeViewModel, favoriteViewModel
+                        , alarmViewModel,isNetworkConnect)
                 }
             }
 
@@ -179,6 +185,11 @@ class MainActivity : ComponentActivity() {
         val currentLanguage = LanguagePreference.getLanguagePref(newBase)
         val context = LocalHelper.setLocale(newBase , currentLanguage ?: "")
         super.attachBaseContext(context)
+    }
+    fun systemLanguage(): String {
+        if(LanguagePreference.getLanguagePref(this) == "def")
+        return Resources.getSystem().configuration.locales[0].language
+        else return LanguagePreference.getLanguagePref(this) ?: "en"
     }
     override fun onResume() {
         super.onResume()

@@ -2,13 +2,12 @@ package com.example.gusty.data.repo
 
 import android.util.Log
 import com.example.gusty.data.local.GustyLocalDataSource
-import com.example.gusty.data.local.favorite.FavoriteEntity
-import com.example.gusty.data.local.GustyLocalDataSourceImpl
 import com.example.gusty.data.local.alarm.AlarmEntity
+import com.example.gusty.data.local.favorite.FavoriteEntity
+import com.example.gusty.data.local.home.HomeEntity
 import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
 import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto
 import com.example.gusty.data.remote.GustyRemoteDataSource
-import com.example.gusty.data.remote.GustyRemoteDataSourceImpl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -87,6 +86,22 @@ class GustyRepoImpl private constructor(
             gustyLocalDataSource.deleteAlarmFromDataBase(alarmEntity)
         }catch (e : Exception){
             -1
+        }
+    }
+
+    override suspend fun insertHomeScreen(homeEntity: HomeEntity): Long {
+        return try {
+           gustyLocalDataSource.insertHomeScreen(homeEntity)
+        }catch (e : Exception){
+            0
+        }
+    }
+
+    override fun getHomeObj(): Flow<HomeEntity> {
+        return try {
+            gustyLocalDataSource.getHomeObj()
+        }catch (e : Exception){
+            flowOf()
         }
     }
 

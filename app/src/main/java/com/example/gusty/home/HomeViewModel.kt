@@ -1,11 +1,10 @@
 package com.example.gusty.home
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.gusty.data.local.home.HomeEntity
 import com.example.gusty.data.repo.GustyRepo
 import com.example.gusty.home.model.CurrentWeatherModel
 import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
@@ -14,7 +13,6 @@ import com.example.gusty.home.model.hourly_daily_model.mapDailyDtoToModel
 import com.example.gusty.home.model.mapDtoToModel
 import com.example.gusty.utilities.UiStateResult
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -29,26 +27,38 @@ class HomeViewModel(val repo: GustyRepo) : ViewModel() {
     val currentWeather  = _currentWeather.asStateFlow()
 
     // hourly weather
-    private val _hourlyWeather = MutableLiveData<List<HourlyAndDailyModel>>()
-    val hourlyWeather = _hourlyWeather
+    private val _hourlyWeather : MutableStateFlow<UiStateResult<List<HourlyAndDailyModel>>>
+            = MutableStateFlow(UiStateResult.Loading)
+    val hourlyWeather = _hourlyWeather.asStateFlow()
 
     // daily weather
-    private val _dailyWeather = MutableLiveData<List<HourlyAndDailyModel>>()
-    val dailyWeather = _dailyWeather
+    private val _dailyWeather : MutableStateFlow<UiStateResult<List<HourlyAndDailyModel>>>
+            = MutableStateFlow(UiStateResult.Loading)
+    val dailyWeather = _dailyWeather.asStateFlow()
+
+    //no connection
+    private val _currentWeatherNoInterNet : MutableStateFlow<UiStateResult<CurrentWeatherModel>>
+            =  MutableStateFlow(UiStateResult.Loading)
+    val currentWeatherNoInterNet  = _currentWeatherNoInterNet.asStateFlow()
+
+    private val _hourlyAndDailyWeatherNoInterNet : MutableStateFlow<UiStateResult<List<HourlyAndDailyModel>>>
+            = MutableStateFlow(UiStateResult.Loading)
+    val hourlyWeatherNoInterNet = _hourlyAndDailyWeatherNoInterNet.asStateFlow()
+
     fun getCurrentWeather(latitude: Double, longitude: Double , unit : String , lang : String ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val current = repo.getCurrentWeather(latitude , longitude , unit , lang)
                     .map { dto -> dto.mapDtoToModel() }
                     .catch {
-                        Log.i("TAG", "home view model failure ${Throwable().message}  ")
+                        Log.i("home", "home view model failure ${Throwable().message}  ")
                         _currentWeather.emit(UiStateResult.Failure(Throwable())) }
                 current.collect {
                     _currentWeather.emit(UiStateResult.Success(it))
                 }
             } catch (e: Exception) {
                 _currentWeather.emit(UiStateResult.Failure(e))
-                Log.i("TAG", "getCurrentWeather: view model error ${e.message}")
+                Log.i("home", "getCurrentWeather: view model error ${e.message}")
             }
         }
     }
@@ -59,10 +69,11 @@ class HomeViewModel(val repo: GustyRepo) : ViewModel() {
                 repo.getDailyAndHourlyWeather(latitude , longitude , unit)
                     .map { daily -> daily.hourlyModel() }
                     .collect {
-                        _hourlyWeather.postValue(it)
+                        _hourlyWeather.emit(UiStateResult.Success(it))
                     }
             } catch (e: Exception) {
-                Log.i("TAG", "getDailyWeather viewModel error : with ${e.message}")
+                Log.i("home", "getDailyWeather viewModel error : with ${e.message}")
+                _hourlyWeather.emit(UiStateResult.Failure(e))
             }
         }
     }
@@ -72,10 +83,35 @@ class HomeViewModel(val repo: GustyRepo) : ViewModel() {
                 repo.getDailyAndHourlyWeather(latitude , longitude , unit)
                     .map { daily -> daily.mapDailyDtoToModel() }
                     .collect {
-                        _dailyWeather.postValue(it)
+                        _dailyWeather.emit(UiStateResult.Success(it))
                     }
             } catch (e: Exception) {
-                Log.i("TAG", "getDailyWeather viewModel error : with ${e.message}")
+                Log.i("home", "getDailyWeather viewModel error : with ${e.message}")
+                _dailyWeather.emit(UiStateResult.Failure(e))
+            }
+        }
+    }
+    fun insertHomeEntity(homeEntity: HomeEntity){
+        viewModelScope.launch {
+            try {
+                Log.i("fav", "insertHomeEntity success ")
+                repo.insertHomeScreen(homeEntity)
+            }catch (e : Exception){
+                Log.i("fav", "insertHomeEntity error ${e.message} ")
+            }
+        }
+    }
+    fun getHomeObj(){
+        viewModelScope.launch {
+            try {
+                repo.getHomeObj()
+                    .catch { _currentWeatherNoInterNet.emit(UiStateResult.Failure(Throwable())) }
+                    .collect {homeEntity ->
+                        _currentWeatherNoInterNet.emit(UiStateResult.Success(homeEntity.currentWeather))
+                        _hourlyAndDailyWeatherNoInterNet.emit(UiStateResult.Success(homeEntity.hourlyAndDaily))
+                    }
+            } catch (e: Exception) {
+
             }
         }
     }

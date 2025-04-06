@@ -16,5 +16,6 @@ enum class LocationEnum{
 }
 enum class LanguageEnum{
     ARABIC ,
-    ENGLISH
+    ENGLISH ,
+    DEFAULT
 }

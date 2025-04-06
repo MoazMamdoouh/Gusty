@@ -157,4 +157,7 @@ dependencies {
     testImplementation ("io.mockk:mockk-agent:1.13.17")
     testImplementation("io.mockk:mockk:1.13.7")
 
+    implementation("com.google.code.gson:gson:2.10.1")
+
+
 }

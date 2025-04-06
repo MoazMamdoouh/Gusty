@@ -73,6 +73,7 @@ fun LanguageCard() {
     val initLocation = when (LanguagePreference.getLanguagePref(context)) {
         "en" ->LanguageEnum.ENGLISH
         "ar" -> LanguageEnum.ARABIC
+        "def" -> LanguageEnum.DEFAULT
         else -> LanguageEnum.ENGLISH
     }
     var selectedArOrEn by remember { mutableStateOf(initLocation) }
@@ -81,11 +82,11 @@ fun LanguageCard() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .height(100.dp),
+            .height(120.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF4E4F4F).copy(alpha = 0.2f)) // Light Blue Transparent
     ) {
-        Row {
+        Column  {
             Spacer(Modifier.height(5.dp))
             Row {
                 Spacer(Modifier.width(8.dp))
@@ -95,20 +96,21 @@ fun LanguageCard() {
                     modifier = Modifier.padding(top = 13.dp)
                 )
             }
+            Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center) {
-                Spacer(Modifier.height(8.dp))
+
                 //default
                 FilterChip(
                     onClick = {
-                        LanguagePreference.setLanguagePref(context , "en")
-                        selectedArOrEn = LanguageEnum.ENGLISH
+                        LanguagePreference.setLanguagePref(context , "def")
+                        selectedArOrEn = LanguageEnum.DEFAULT
                         restartApp(context)
                     },
                     label = {
-                        Text(stringResource(R.string.english))
+                        Text(stringResource(R.string.defaultt))
                     },
-                    selected = selectedArOrEn == LanguageEnum.ENGLISH,
-                    leadingIcon = if (selectedArOrEn == LanguageEnum.ENGLISH) {
+                    selected = selectedArOrEn == LanguageEnum.DEFAULT,
+                    leadingIcon = if (selectedArOrEn == LanguageEnum.DEFAULT) {
                         {
                             Icon(
                                 imageVector = Icons.Filled.Done,
@@ -127,6 +129,7 @@ fun LanguageCard() {
                     )
                 )
                 //english
+                Spacer(Modifier.width(5.dp))
                 FilterChip(
                     onClick = {
                         LanguagePreference.setLanguagePref(context , "en")

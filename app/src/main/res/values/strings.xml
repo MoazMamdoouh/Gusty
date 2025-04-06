@@ -49,4 +49,5 @@
     <string name="gust">"gust  : "</string>
     <string name="km_h">km/h</string>
     <string name="hpa">hPa</string>
+    <string name="defaultt">Default</string>
 </resources>

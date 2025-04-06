@@ -5,12 +5,15 @@ import com.example.gusty.data.local.alarm.AlarmDao
 import com.example.gusty.data.local.alarm.AlarmEntity
 import com.example.gusty.data.local.favorite.FavoriteDao
 import com.example.gusty.data.local.favorite.FavoriteEntity
+import com.example.gusty.data.local.home.HomeDao
+import com.example.gusty.data.local.home.HomeEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 class GustyLocalDataSourceImpl private constructor(
     private val dao : FavoriteDao ,
-    private val alarmDao: AlarmDao
+    private val alarmDao: AlarmDao ,
+    private val homeDao: HomeDao
     )  : GustyLocalDataSource{
 
     override suspend fun insertItemToFavorite(favoriteEntity: FavoriteEntity): Long {
@@ -55,14 +58,32 @@ class GustyLocalDataSourceImpl private constructor(
             -1
         }
     }
+
+    override suspend fun insertHomeScreen(homeEntity: HomeEntity): Long {
+        return try {
+            homeDao.insertHomeScreen(homeEntity)
+        }catch (e : Exception){
+            0
+        }
+    }
+
+    override fun getHomeObj(): Flow<HomeEntity> {
+        return try {
+            homeDao.getHomeObj()
+        }catch (e : Exception){
+           flowOf()
+        }
+    }
+
     companion object {
         private var INSTANCE: GustyLocalDataSourceImpl? = null
         fun getInstance(
             dao: FavoriteDao ,
-            alarmDao: AlarmDao
+            alarmDao: AlarmDao ,
+            homeDao: HomeDao
         ): GustyLocalDataSourceImpl {
             return INSTANCE ?: synchronized(this) {
-                val temp = GustyLocalDataSourceImpl(dao , alarmDao)
+                val temp = GustyLocalDataSourceImpl(dao , alarmDao ,homeDao )
                 INSTANCE = temp
                 temp
             }

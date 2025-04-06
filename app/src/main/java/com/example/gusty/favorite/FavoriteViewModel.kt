@@ -52,7 +52,7 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
                 repo.insertItemToFavorite(favoriteEntity)
                 _message.emit("Insertion Success")
             } catch (e: Exception) {
-                Log.i("TAG", "view model insertion error ${e.message} ")
+                Log.i("favorite", "view model insertion error ${e.message} ")
             }
         }
     }
@@ -77,7 +77,7 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
             try {
                 repo.deleteLocationFromFavorite(favoriteEntity)
             }catch (e : Exception){
-                Log.i("TAG", "deleteLocationFromFavorite error ${e.message} ")
+                Log.i("favorite", "deleteLocationFromFavorite error ${e.message} ")
             }
         }
     }

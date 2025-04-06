@@ -26,9 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gusty.R
+import com.example.gusty.data.local.home.HomeEntity
 import com.example.gusty.home.model.CurrentWeatherModel
 import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
 import com.example.gusty.setting.LanguagePreference
@@ -57,94 +56,114 @@ import com.example.gusty.utilities.BackGrounds
 import com.example.gusty.utilities.UiStateResult
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel, lat: Double = 0.0, lon: Double = 0.0) {
+fun HomeScreen(
+    homeViewModel: HomeViewModel,
+    lat: Double = 0.0,
+    lon: Double = 0.0,
+    isNetworkConnect: Boolean = true
+) {
+        val currentWeatherViewModel =
+            homeViewModel.currentWeather.collectAsStateWithLifecycle().value
+        val hourlyWeatherViewModel =
+            homeViewModel.hourlyWeather.collectAsStateWithLifecycle().value
+        val dailyWeatherViewModel =
+            homeViewModel.dailyWeather.collectAsStateWithLifecycle().value
+        val scrollState = rememberScrollState()
+        val context = LocalContext.current
+        val finalLat = if (lat == 0.0) Preference.getLatitudeSharedPreference(context) else lat
+        val finalLon = if (lon == 0.0) Preference.getLongitudeSharedPreference(context) else lon
 
-    val currentWeatherViewModel = homeViewModel.currentWeather.collectAsStateWithLifecycle().value
-    val hourlyWeatherViewModel = homeViewModel.hourlyWeather.observeAsState()
-    val dailyWeatherViewModel = homeViewModel.dailyWeather.observeAsState()
-    val scrollState = rememberScrollState()
-    val context = LocalContext.current
-    val finalLat = if (lat == 0.0) Preference.getLatitudeSharedPreference(context) else lat
-    val finalLon = if (lon == 0.0) Preference.getLongitudeSharedPreference(context) else lon
+        var background by remember { mutableStateOf(Color.White) }
+        var secondBackground by remember { mutableStateOf(Color.White) }
 
-    var background by remember { mutableStateOf(Color.White) }
-    var secondBackground by remember { mutableStateOf(Color.White) }
-
-    LaunchedEffect(currentWeatherViewModel) {
-        if (currentWeatherViewModel is UiStateResult.Success) {
-            background = currentWeatherViewModel.response.backgroundColor
-            secondBackground = currentWeatherViewModel.response.secondBackGroundColor
+        LaunchedEffect(currentWeatherViewModel) {
+            if (currentWeatherViewModel is UiStateResult.Success) {
+                background = currentWeatherViewModel.response.backgroundColor
+                secondBackground = currentWeatherViewModel.response.secondBackGroundColor
+            }
         }
-    }
-    LaunchedEffect(finalLat, finalLon) {
-        homeViewModel.getCurrentWeather(
-            finalLat, finalLon,
-            UnitPreference.getUnitSharedPreference(context) ?: "metric" ,
-            LanguagePreference.getLanguagePref(context) ?: "en"
-        )
-        homeViewModel.getHourlyWeather(
-            finalLat, finalLon,
-            UnitPreference.getUnitSharedPreference(context) ?: "metric"
-        )
-        homeViewModel.getDailyWeather(
-            finalLat, finalLon,
-            UnitPreference.getUnitSharedPreference(context) ?: "metric"
-        )
-    }
-
-    val unitAsChar = remember { mutableStateOf("") }
-    val lang = LanguagePreference.getLanguagePref(context)
-    when (UnitPreference.getUnitSharedPreference(context) ) {
-        "metric" -> if(lang == "en")unitAsChar.value = "C" else unitAsChar.value =  "س"
-        "imperial" -> if(lang == "en")unitAsChar.value = "F" else unitAsChar.value =  "ف"
-        "standard" ->if(lang == "en")unitAsChar.value = "K" else unitAsChar.value =  "ك"
-    }
-
-    when (currentWeatherViewModel) {
-        is UiStateResult.Failure -> {
-
-            Log.i("home", "HomeScreen failure in UI state ")
+        LaunchedEffect(finalLat, finalLon) {
+            homeViewModel.getCurrentWeather(
+                finalLat, finalLon,
+                UnitPreference.getUnitSharedPreference(context) ?: "metric",
+                LanguagePreference.getLanguagePref(context) ?: "en"
+            )
+            homeViewModel.getHourlyWeather(
+                finalLat, finalLon,
+                UnitPreference.getUnitSharedPreference(context) ?: "metric"
+            )
+            homeViewModel.getDailyWeather(
+                finalLat, finalLon,
+                UnitPreference.getUnitSharedPreference(context) ?: "metric"
+            )
         }
-        is UiStateResult.Loading -> Log.i("home", "HomeScreen Loading in UI state ")
-        is UiStateResult.Success -> {
-            BackGrounds.setFirstBackGround(background)
-            BackGrounds.setSecondBackGround(secondBackground)
-            Column(
-                modifier = Modifier
-                    .verticalScroll(scrollState)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            listOf(
-                                background,
-                                secondBackground
+
+        val unitAsChar = remember { mutableStateOf("") }
+        val lang = LanguagePreference.getLanguagePref(context)
+        when (UnitPreference.getUnitSharedPreference(context)) {
+            "metric" -> if (lang == "en") unitAsChar.value = "C" else unitAsChar.value = "س"
+            "imperial" -> if (lang == "en") unitAsChar.value = "F" else unitAsChar.value = "ف"
+            "standard" -> if (lang == "en") unitAsChar.value = "K" else unitAsChar.value = "ك"
+        }
+
+        when (currentWeatherViewModel) {
+            is UiStateResult.Failure -> {
+                Log.e(
+                    "home",
+                    "HomeScreen failure in UI state: ${currentWeatherViewModel.exception.cause}"
+                )
+            }
+
+            is UiStateResult.Loading -> Log.i("home", "HomeScreen Loading in UI state ")
+            is UiStateResult.Success -> {
+                BackGrounds.setFirstBackGround(background)
+                BackGrounds.setSecondBackGround(secondBackground)
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(scrollState)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    background,
+                                    secondBackground
+                                )
                             )
                         )
+                        .fillMaxSize()
+                ) {
+                    Spacer(Modifier.height(10.dp))
+                    DailyWeatherInfoCard(currentWeatherViewModel.response, unitAsChar)
+                    Spacer(Modifier.height(10.dp))
+                    DailyAndHourlyWeatherCard(
+                        hourlyWeatherViewModel,
+                        dailyWeatherViewModel,
+                        currentWeatherViewModel.response.backgroundColor,
+                        unitAsChar
                     )
-                    .fillMaxSize()
-            ) {
-                Spacer(Modifier.height(10.dp))
-                DailyWeatherInfoCard(currentWeatherViewModel.response , unitAsChar)
-                Spacer(Modifier.height(10.dp))
-                DailyAndHourlyWeatherCard(
-                    hourlyWeatherViewModel,
-                    dailyWeatherViewModel,
-                    currentWeatherViewModel.response.backgroundColor ,
-                    unitAsChar
-                )
-                Spacer(Modifier.height(10.dp))
-                Row {
-                    WindCard(currentWeatherViewModel.response)
-                    RainCard(currentWeatherViewModel.response)
-                }
-                Spacer(Modifier.height(5.dp))
-                Row {
-                    CloudCard(currentWeatherViewModel.response)
-                    PressureCard(currentWeatherViewModel.response)
+                    Spacer(Modifier.height(10.dp))
+                    Row {
+                        WindCard(currentWeatherViewModel.response)
+                        RainCard(currentWeatherViewModel.response)
+                    }
+                    Spacer(Modifier.height(5.dp))
+                    Row {
+                        CloudCard(currentWeatherViewModel.response)
+                        PressureCard(currentWeatherViewModel.response)
+                    }
                 }
             }
         }
-    }
-
+        if (currentWeatherViewModel is UiStateResult.Success && hourlyWeatherViewModel is UiStateResult.Success
+            && dailyWeatherViewModel is UiStateResult.Success
+        ) {
+            homeViewModel.insertHomeEntity(
+                HomeEntity(
+                    1,
+                    currentWeatherViewModel.response,
+                    hourlyWeatherViewModel.response
+                )
+            )
+        }
 }
 
 @Composable
@@ -193,7 +212,10 @@ fun DailyWeatherInfoCard(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = unitAsChar.value, modifier = Modifier.padding(5.dp), color = Color.White , fontSize = 30.sp
+                    text = unitAsChar.value,
+                    modifier = Modifier.padding(5.dp),
+                    color = Color.White,
+                    fontSize = 30.sp
                 )
             }
             currentWeatherViewModel.weather[0].description.let {
@@ -220,8 +242,7 @@ fun DailyWeatherInfoCard(
                     Text(
                         text = unitAsChar.value,
                         modifier = Modifier.padding(5.dp),
-                        color = Color.White
-                        , fontSize = 15.sp
+                        color = Color.White, fontSize = 15.sp
                     )
                     Text(
                         " / ", fontSize = 15.sp, modifier = Modifier
@@ -239,8 +260,7 @@ fun DailyWeatherInfoCard(
                     Text(
                         text = unitAsChar.value,
                         modifier = Modifier.padding(5.dp),
-                        color = Color.White
-                        , fontSize = 20.sp
+                        color = Color.White, fontSize = 20.sp
                     )
                     Text(
                         text = stringResource(R.string.feels_like),
@@ -262,7 +282,7 @@ fun DailyWeatherInfoCard(
                     Text(
                         text = unitAsChar.value,
                         modifier = Modifier.padding(5.dp),
-                        color = Color.White ,
+                        color = Color.White,
                         fontSize = 20.sp
                     )
                 }
@@ -275,8 +295,8 @@ fun DailyWeatherInfoCard(
 
 @Composable
 fun DailyAndHourlyWeatherCard(
-    hourlyWeatheViewModel: State<List<HourlyAndDailyModel>?>,
-    dailyWeatherViewModel: State<List<HourlyAndDailyModel>?>,
+    hourlyWeatheViewModel: UiStateResult<List<HourlyAndDailyModel>>,
+    dailyWeatherViewModel: UiStateResult<List<HourlyAndDailyModel>>,
     backgroundColor: Color,
     unitAsChar: MutableState<String>
 ) {
@@ -338,7 +358,7 @@ fun DailyAndHourlyWeatherCard(
                     )
                 }
             }
-            IsHourlyOrDaily(selectOption, hourlyWeatheViewModel, dailyWeatherViewModel , unitAsChar)
+            IsHourlyOrDaily(selectOption, hourlyWeatheViewModel, dailyWeatherViewModel, unitAsChar)
         }
     }
 }
@@ -626,24 +646,37 @@ fun PressureCard(currentWeatherViewModel: CurrentWeatherModel) {
 @Composable
 fun IsHourlyOrDaily(
     selectOption: MutableState<String>,
-    hourlyWeatherViewModel: State<List<HourlyAndDailyModel>?>,
-    dailyWeatherViewModel: State<List<HourlyAndDailyModel>?>,
+    hourlyWeatherViewModel: UiStateResult<List<HourlyAndDailyModel>>,
+    dailyWeatherViewModel: UiStateResult<List<HourlyAndDailyModel>>,
     unitAsChar: MutableState<String>
 ) {
 
 
     if (selectOption.value == stringResource(R.string.hourly)) {
-        LazyRow {
-            itemsIndexed(hourlyWeatherViewModel.value.orEmpty()) { _, hour ->
-                HourlyWeatherItem(hour , unitAsChar)
+        when (hourlyWeatherViewModel) {
+            is UiStateResult.Failure -> Log.i("TAG", "IsHourlyOrDaily: fail")
+            UiStateResult.Loading -> Log.i("TAG", "IsHourlyOrDaily: loading")
+            is UiStateResult.Success -> {
+                LazyRow {
+                    itemsIndexed(hourlyWeatherViewModel.response) { _, hour ->
+                        HourlyWeatherItem(hour, unitAsChar)
+                    }
+                }
             }
         }
     } else {
-        LazyRow {
-            itemsIndexed(dailyWeatherViewModel.value.orEmpty()) { _, daily ->
-                DailyWeatherItem(daily , unitAsChar)
+        when (dailyWeatherViewModel) {
+            is UiStateResult.Failure -> Log.i("TAG", "IsHourlyOrDaily: fail")
+            UiStateResult.Loading -> Log.i("TAG", "IsHourlyOrDaily: loading")
+            is UiStateResult.Success -> {
+                LazyRow {
+                    itemsIndexed(dailyWeatherViewModel.response) { _, daily ->
+                        DailyWeatherItem(daily, unitAsChar)
+                    }
+                }
             }
         }
+
     }
 }
 
@@ -740,7 +773,7 @@ fun DailyWeatherItem(daily: HourlyAndDailyModel, unitAsChar: MutableState<String
                         .padding(top = 5.dp)
                 )
                 Text(
-                    text =unitAsChar.value,
+                    text = unitAsChar.value,
                     color = Color.Black,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,

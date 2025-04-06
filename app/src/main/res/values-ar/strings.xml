@@ -50,4 +50,5 @@
     <string name="gust">"هَبَّة: "</string>
     <string name="km_h">كم/س</string>
     <string name="hpa">هيكتوباسكال</string>
+    <string name="defaultt">لغه الهاتف</string>
 </resources>

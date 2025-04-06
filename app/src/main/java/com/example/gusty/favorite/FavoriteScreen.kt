@@ -53,7 +53,6 @@ import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.home.HomeScreen
 import com.example.gusty.home.HomeViewModel
 import com.example.gusty.setting.LanguagePreference
-import com.example.gusty.setting.Preference
 import com.example.gusty.setting.UnitPreference
 import com.example.gusty.ui.theme.gray
 import com.example.gusty.utilities.BackGrounds
@@ -366,7 +365,7 @@ fun OpenButtonSheet(
         modifier = Modifier.fillMaxSize()
     ) {
         Log.i("TAG", "in favorite screen lat ${favoriteEntity.lat} & lon ${favoriteEntity.lon} ")
-        HomeScreen(homeViewModel ,favoriteEntity.lat , favoriteEntity.lon )
+        HomeScreen(homeViewModel ,favoriteEntity.lat , favoriteEntity.lon  , isNetworkConnect = true)
     }
 }
 
