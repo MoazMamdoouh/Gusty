@@ -8,8 +8,6 @@ import com.example.gusty.data.local.favorite.FavoriteEntity
 import com.example.gusty.data.local.favorite.convertCurrentDtoToEntity
 import com.example.gusty.data.repo.GustyRepo
 import com.example.gusty.utilities.UiStateResult
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,8 +25,8 @@ class FavoriteViewModel(private val repo: GustyRepo) : ViewModel() {
         MutableStateFlow(UiStateResult.Loading)
     val listOfFavorite  = _listOfFavorite.asStateFlow()
 
-    private val _message: MutableSharedFlow<String> =
-        MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    private val _message: MutableStateFlow<String> =
+        MutableStateFlow("init")
     val message  = _message.asSharedFlow()
 
     fun getCurrentWeatherForFavorite(latitude: Double, longitude: Double , unit : String , lang : String ) {

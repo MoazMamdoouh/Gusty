@@ -8,6 +8,7 @@ import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.nightColor
 import com.example.gusty.ui.theme.orange
+import com.example.gusty.ui.theme.red
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -128,7 +129,7 @@ fun getBackGroundColor(time: Int): Color {
     return when (time) {
         in 6..13 -> blue
         in 14..17 -> orange
-        in 18..19 -> Color.Red
+        in 18..19 -> red
         in 20..23, in 0..5 -> nightColor
         else -> Color.Black
     }

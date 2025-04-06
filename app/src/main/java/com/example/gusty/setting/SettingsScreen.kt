@@ -25,7 +25,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,7 +96,36 @@ fun LanguageCard() {
                 )
             }
             Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center) {
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.height(8.dp))
+                //default
+                FilterChip(
+                    onClick = {
+                        LanguagePreference.setLanguagePref(context , "en")
+                        selectedArOrEn = LanguageEnum.ENGLISH
+                        restartApp(context)
+                    },
+                    label = {
+                        Text(stringResource(R.string.english))
+                    },
+                    selected = selectedArOrEn == LanguageEnum.ENGLISH,
+                    leadingIcon = if (selectedArOrEn == LanguageEnum.ENGLISH) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Done icon",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    } else {
+                        null
+                    }, colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Color.White,
+                        selectedLabelColor = Color.Black,
+                        selectedLeadingIconColor = Color.Black,
+                        containerColor = Color.Gray,
+                        labelColor = Color.White
+                    )
+                )
                 //english
                 FilterChip(
                     onClick = {
@@ -318,7 +346,13 @@ fun UnitCard() {
                     }
                 } else {
                     null
-                },
+                },colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = Color.White,
+                    selectedLabelColor = Color.Black,
+                    selectedLeadingIconColor = Color.Black,
+                    containerColor = Color.Gray,
+                    labelColor = Color.White
+                )
             )
             Spacer(Modifier.width(9.dp))
             FilterChip(
@@ -341,7 +375,13 @@ fun UnitCard() {
                     }
                 } else {
                     null
-                },
+                },colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = Color.White,
+                    selectedLabelColor = Color.Black,
+                    selectedLeadingIconColor = Color.Black,
+                    containerColor = Color.Gray,
+                    labelColor = Color.White
+                )
             )
             Spacer(Modifier.width(9.dp))
             FilterChip(
@@ -364,7 +404,13 @@ fun UnitCard() {
                     }
                 } else {
                     null
-                },
+                },colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = Color.White,
+                    selectedLabelColor = Color.Black,
+                    selectedLeadingIconColor = Color.Black,
+                    containerColor = Color.Gray,
+                    labelColor = Color.White
+                )
             )
         }
     }
@@ -444,7 +490,13 @@ fun WindSettingsCard() {
                     }
                 } else {
                     null
-                },
+                },colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = Color.White,
+                    selectedLabelColor = Color.Black,
+                    selectedLeadingIconColor = Color.Black,
+                    containerColor = Color.Gray,
+                    labelColor = Color.White
+                )
             )
         }
     }

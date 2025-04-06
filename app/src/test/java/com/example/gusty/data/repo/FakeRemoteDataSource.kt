@@ -6,10 +6,12 @@ import com.example.gusty.data.remote.GustyRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 
 class FakeRemoteDataSource : GustyRemoteDataSource {
+
     override suspend fun getCurrentWeather(
         latitude: Double,
         longitude: Double,
-        unit: String
+        unit: String,
+        lang: String
     ): Flow<CurrentWeatherDto> {
         TODO("Not yet implemented")
     }

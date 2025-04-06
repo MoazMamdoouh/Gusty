@@ -1,9 +1,7 @@
 package com.example.gusty
 
 import android.content.Context
-import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -50,23 +48,20 @@ import com.example.gusty.favorite.FavoriteFactory
 import com.example.gusty.favorite.FavoriteViewModel
 import com.example.gusty.home.HomeFactory
 import com.example.gusty.home.HomeViewModel
+import com.example.gusty.network_status.NetworkManager
 import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.utilities.ButtonNavyItems
 import com.example.gusty.utilities.LocalHelper
 import com.example.gusty.utilities.LocationPermission
 import com.example.gusty.utilities.MyNavGraph
-import com.example.gusty.network_status.NetworkConnectionBroadCast
-import com.example.gusty.network_status.NetworkManager
 import com.example.gusty.utilities.Routes
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
 class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationProvider: FusedLocationProviderClient
-    private lateinit var networkConnectionBroadCast: NetworkConnectionBroadCast
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //registerBroadcastReceiver()
         NetworkManager.registerNetworkCallback(this)
         setContent {
             var isNetworkConnect by remember { mutableStateOf(false) }
@@ -79,7 +74,6 @@ class MainActivity : ComponentActivity() {
                 isNetworkConnect = NetworkManager.getNetworkState()
                 NetworkManager.registerNetworkCallback(this@MainActivity)
             }
-
             val factory =
                 HomeFactory(
                     GustyRepoImpl.getInstance(
@@ -181,13 +175,6 @@ class MainActivity : ComponentActivity() {
         }
 
     }
-    private fun registerBroadcastReceiver() {
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)
-
-        networkConnectionBroadCast = NetworkConnectionBroadCast()
-        registerReceiver(networkConnectionBroadCast, intentFilter)
-    }
     override fun attachBaseContext(newBase: Context) {
         val currentLanguage = LanguagePreference.getLanguagePref(newBase)
         val context = LocalHelper.setLocale(newBase , currentLanguage ?: "")
@@ -238,8 +225,8 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    override fun onStop() {
+   /* override fun onStop() {
         super.onStop()
         unregisterReceiver(networkConnectionBroadCast)
-    }
+    }*/
 }

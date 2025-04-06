@@ -21,7 +21,7 @@ val whiteNightColor = Color(0xFF444454)
 val orange = Color(0xFFECB042)
 val light_orange = Color(0xFFE1BD7B)
 
-val red = Color(0xFFEE5656)
+val red = Color(0xFF853D3D)
 val second_red = Color(0xFFA65151)
 
 val transparentBlack = Color(0x4D000000)

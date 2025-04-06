@@ -1,13 +1,11 @@
 package com.example.gusty.home.model
 
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.example.gusty.data.model.curren_weather_dto.Clouds
 import com.example.gusty.data.model.curren_weather_dto.CurrentWeatherDto
 import com.example.gusty.data.model.curren_weather_dto.Rain
 import com.example.gusty.data.model.curren_weather_dto.Weather
 import com.example.gusty.data.model.curren_weather_dto.Wind
-import com.example.gusty.setting.UnitPreference
 import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.dark_blue
 import com.example.gusty.ui.theme.light_orange
@@ -20,7 +18,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-
 
 data class CurrentWeatherModel(
     val lat: Double,
