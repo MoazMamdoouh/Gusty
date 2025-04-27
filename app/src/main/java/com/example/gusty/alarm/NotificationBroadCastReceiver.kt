@@ -21,7 +21,7 @@ import com.example.gusty.data.local.GustyLocalDataSourceImpl
 import com.example.gusty.data.remote.GustyRemoteDataSourceImpl
 import com.example.gusty.data.remote.RetrofitService
 import com.example.gusty.data.repo.GustyRepoImpl
-import com.example.gusty.home.model.mapDtoToModel
+import com.example.gusty.home.model.current_weather_model.mapDtoToModel
 import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.setting.Preference
 import com.example.gusty.setting.UnitPreference

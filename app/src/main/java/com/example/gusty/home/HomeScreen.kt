@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gusty.R
 import com.example.gusty.data.local.home.HomeEntity
-import com.example.gusty.home.model.CurrentWeatherModel
+import com.example.gusty.home.model.current_weather_model.CurrentWeatherModel
 import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
 import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.setting.Preference

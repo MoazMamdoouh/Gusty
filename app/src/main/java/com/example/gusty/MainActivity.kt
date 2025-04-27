@@ -64,7 +64,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         NetworkManager.registerNetworkCallback(this)
-        systemLanguage()
         setContent {
             var isNetworkConnect by remember { mutableStateOf(false) }
 
@@ -186,11 +185,7 @@ class MainActivity : ComponentActivity() {
         val context = LocalHelper.setLocale(newBase , currentLanguage ?: "")
         super.attachBaseContext(context)
     }
-    fun systemLanguage(): String {
-        if(LanguagePreference.getLanguagePref(this) == "def")
-        return Resources.getSystem().configuration.locales[0].language
-        else return LanguagePreference.getLanguagePref(this) ?: "en"
-    }
+
     override fun onResume() {
         super.onResume()
 

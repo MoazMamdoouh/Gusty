@@ -6,11 +6,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.gusty.data.local.home.HomeEntity
 import com.example.gusty.data.repo.GustyRepo
-import com.example.gusty.home.model.CurrentWeatherModel
+import com.example.gusty.home.model.current_weather_model.CurrentWeatherModel
+import com.example.gusty.home.model.current_weather_model.mapDtoToModel
 import com.example.gusty.home.model.hourly_daily_model.HourlyAndDailyModel
 import com.example.gusty.home.model.hourly_daily_model.hourlyModel
 import com.example.gusty.home.model.hourly_daily_model.mapDailyDtoToModel
-import com.example.gusty.home.model.mapDtoToModel
 import com.example.gusty.utilities.UiStateResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

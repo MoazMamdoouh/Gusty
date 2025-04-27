@@ -1,7 +1,7 @@
 package com.example.gusty.data.local.home
 
 import androidx.room.TypeConverter
-import com.example.gusty.home.model.CurrentWeatherModel
+import com.example.gusty.home.model.current_weather_model.CurrentWeatherModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 

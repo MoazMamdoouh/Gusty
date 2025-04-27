@@ -1,10 +1,8 @@
 package com.example.gusty.home.model.hourly_daily_model
 
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.example.gusty.R
 import com.example.gusty.data.model.hourly_daily_dto.HourlyAndDailyDto
-import com.example.gusty.setting.LanguagePreference
 import com.example.gusty.ui.theme.blue
 import com.example.gusty.ui.theme.nightColor
 import com.example.gusty.ui.theme.orange
@@ -21,47 +19,64 @@ data class HourlyAndDailyModel(
     val backGroundColor: Color,
     val day: String
 )
-
 fun HourlyAndDailyDto.hourlyModel(): List<HourlyAndDailyModel> {
     val timeZone = city.timezone
-    val groupedForecast = list.groupBy { it.dt_txt?.substring(0, 10) }
-    val todayKey = groupedForecast.keys.firstOrNull()
-    val todayForecast = groupedForecast[todayKey] ?: emptyList()
-    val upcomingDays = groupedForecast.filterKeys { it != todayKey }
-    val currentDay = getCurrentDay(timeZone)
+    // Group entries by their local date
+    val groupedForecast = list.groupBy { entry ->
+        val localDt = entry.dt + timeZone
+        convertUnixToDate(localDt)
+    }
+    val currentDate = getCurrentDay(timeZone)
+    val todayForecast = groupedForecast[currentDate] ?: emptyList()
+    val currentLocalTime = (System.currentTimeMillis() / 1000) + timeZone
 
-    return todayForecast.map {
-        val adjustTimeStamp = it.dt + timeZone
+    // Filter to include only future hours
+    val filteredTodayForecast = todayForecast.filter { entry ->
+        (entry.dt + timeZone) >= currentLocalTime
+    }
+
+    return filteredTodayForecast.map { entry ->
+        val adjustTimeStamp = entry.dt + timeZone
         val hour = getHourFromAdjustedDt(adjustTimeStamp)
         val timeInString = convertUnixToHour(adjustTimeStamp)
         val backGround = getBackGroundColor(hour)
-        val newIcon = convertIcon(it.weather.firstOrNull()?.icon)
+        val newIcon = convertIcon(entry.weather.firstOrNull()?.icon)
         HourlyAndDailyModel(
-            temperature = it.main.temp.toInt(),
+            temperature = entry.main.temp.toInt(),
             time = timeInString,
             icon = newIcon,
             backGroundColor = backGround,
             day = ""
         )
     }
-
 }
 
 fun HourlyAndDailyDto.mapDailyDtoToModel(): List<HourlyAndDailyModel> {
+    val timeZone = city.timezone
+    // Group entries by local date
+    val groupedByDay = list.groupBy { entry ->
+        val localDt = entry.dt + timeZone
+        convertUnixToDate(localDt)
+    }
 
-    return list.filter {
-        val formattedTime = convertUnixToHour(it.dt)
-        formattedTime.equals("11 AM", ignoreCase = true) ||
-                formattedTime.equals("١١ ص", ignoreCase = true)
-    }.map {
-        Log.i("daily", "mapDailyDtoToModel: ${it.dt}")
-        val day = convertUnixToDayOfWeek(dt = it.dt)
-        val timeInString = convertUnixToHour(it.dt)
-        val timeInInt = convertHourToInt(timeInString)
-        val backGround = getBackGroundColor(timeInInt)
-        val newIcon = convertIcon(it.weather.firstOrNull()?.icon)
+    val currentDate = getCurrentDay(timeZone)
+
+    // Process each day except today
+    return groupedByDay.filterKeys { it != currentDate }.values.mapNotNull { dailyEntries ->
+        // Select entry closest to noon (12 PM)
+        dailyEntries.minByOrNull { entry ->
+            val localHour = getHourFromAdjustedDt(entry.dt + timeZone)
+            kotlin.math.abs(12 - localHour)
+        }
+    }.map { entry ->
+        val localDt = entry.dt + timeZone
+        val day = convertUnixToDayOfWeek(localDt)
+        val timeInString = convertUnixToHour(localDt)
+        val hour = getHourFromAdjustedDt(localDt)
+        val backGround = getBackGroundColor(hour)
+        val newIcon = convertIcon(entry.weather.firstOrNull()?.icon)
         HourlyAndDailyModel(
-            temperature = it.main.temp.toInt(),
+            temperature = entry.main.temp.toInt(),
             time = timeInString,
             icon = newIcon,
             backGroundColor = backGround,
@@ -136,7 +151,9 @@ fun getBackGroundColor(time: Int): Color {
 }
 
 fun convertUnixToDayOfWeek(dt: Long): String {
-    val date = Date(dt * 1000L)
+    val date = Date(dt * 1000L) // dt is already local timestamp
     val format = SimpleDateFormat("EEEE", Locale.getDefault())
     return format.format(date)
 }
+
+// Other functions remain the same but ensure they receive the correct local timestamps

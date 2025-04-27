@@ -2,6 +2,7 @@ package com.example.gusty.setting
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -102,7 +103,7 @@ fun LanguageCard() {
                 //default
                 FilterChip(
                     onClick = {
-                        LanguagePreference.setLanguagePref(context , "def")
+                        LanguagePreference.setLanguagePref(context , systemLanguage(context))
                         selectedArOrEn = LanguageEnum.DEFAULT
                         restartApp(context)
                     },
@@ -513,3 +514,8 @@ fun restartApp(context: Context) {
     activity?.startActivity(intent)
 }
 
+fun systemLanguage(context: Context): String {
+    //if(LanguagePreference.getLanguagePref(context) == "def")
+        return Resources.getSystem().configuration.locales[0].language
+    //else return LanguagePreference.getLanguagePref(this) ?: "en"
+}

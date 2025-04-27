@@ -103,10 +103,11 @@ class AlarmViewModel(private val repo: GustyRepo) : ViewModel() {
         }
     }
 
-    fun deleteAlarmFromDataBase(alarmEntity: AlarmEntity){
+    fun deleteAlarmFromDataBase(alarmEntity: AlarmEntity, androidAlarmManager: AndroidAlarmManager){
         viewModelScope.launch {
             try {
                 repo.deleteAlarmFromDataBase(alarmEntity)
+                androidAlarmManager.cancel(alarmEntity.id)
             }catch (e : Exception){
                 Log.i("TAG", "deleteAlarmFromDataBase view model error in deleting ${e.message} ")
             }

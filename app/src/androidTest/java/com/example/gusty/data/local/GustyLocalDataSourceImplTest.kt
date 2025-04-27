@@ -3,10 +3,11 @@ package com.example.gusty.data.local
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
+import androidx.test.filters.MediumTest
 import com.example.gusty.data.local.alarm.AlarmDao
 import com.example.gusty.data.local.favorite.FavoriteDao
 import com.example.gusty.data.local.favorite.FavoriteEntity
+import com.example.gusty.data.local.home.HomeDao
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
@@ -16,12 +17,13 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@SmallTest
+@MediumTest
 @RunWith(AndroidJUnit4::class)
 class GustyLocalDataSourceImplTest {
     private lateinit var dataBase: FavoriteDataBase
     private lateinit var dao: FavoriteDao
     private lateinit var alarmDao: AlarmDao
+    private lateinit var homeDao: HomeDao
     private lateinit var gustyLocalDataSourceImpl: GustyLocalDataSourceImpl
 
     @Before
@@ -34,7 +36,8 @@ class GustyLocalDataSourceImplTest {
             .build()
         dao = dataBase.getProductsDao()
         alarmDao = dataBase.getAlarmDao()
-        gustyLocalDataSourceImpl = GustyLocalDataSourceImpl.getInstance(dao , alarmDao)
+        homeDao = dataBase.getHomeDao()
+        gustyLocalDataSourceImpl = GustyLocalDataSourceImpl.getInstance(dao , alarmDao ,homeDao )
     }
     @Test
     fun insertItemToFavorite_retrieveSuccess() = runTest{

@@ -1,4 +1,4 @@
-package com.example.gusty.home.model
+package com.example.gusty.home.model.current_weather_model
 
 import com.example.gusty.data.model.curren_weather_dto.Main
 

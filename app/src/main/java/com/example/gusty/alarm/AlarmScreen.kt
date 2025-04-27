@@ -483,11 +483,12 @@ fun OpenDeleteFromAlarmDialog(
     alarm: AlarmEntity,
     alarmViewModel: AlarmViewModel,
 ) {
+    val context = LocalContext.current
     androidx.compose.material.AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             androidx.compose.material.TextButton(onClick = {
-                alarmViewModel.deleteAlarmFromDataBase(alarm)
+                alarmViewModel.deleteAlarmFromDataBase(alarm , AndroidAlarmManager(context))
                 onDismiss.invoke()
             }) {
                 Text(stringResource(R.string.delete), color = Color.Red)

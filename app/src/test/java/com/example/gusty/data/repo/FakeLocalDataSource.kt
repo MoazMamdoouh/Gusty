@@ -3,6 +3,7 @@ package com.example.gusty.data.repo
 import com.example.gusty.data.local.GustyLocalDataSource
 import com.example.gusty.data.local.alarm.AlarmEntity
 import com.example.gusty.data.local.favorite.FavoriteEntity
+import com.example.gusty.data.local.home.HomeEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -32,6 +33,14 @@ class FakeLocalDataSource(
     }
 
     override suspend fun deleteAlarmFromDataBase(alarmEntity: AlarmEntity): Int {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun insertHomeScreen(homeEntity: HomeEntity): Long {
+        TODO("Not yet implemented")
+    }
+
+    override fun getHomeObj(): Flow<HomeEntity> {
         TODO("Not yet implemented")
     }
 }
